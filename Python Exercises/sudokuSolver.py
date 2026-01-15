@@ -45,6 +45,8 @@
 
 import pprint #want this to print out the sudoku boards in more readable format
 
+import copy #need a way to create an entirely new copy of the game board which will be altered first to avoid overwriting the actual game board, and ".copy()" isn't good enough for a list of lists
+
 def validityChecker(board: list[list[str]]) -> bool:
    
    #Going to create new empty list of 9 empty lists to store sub boxes for checking later
@@ -167,20 +169,42 @@ def validityChecker(board: list[list[str]]) -> bool:
 """Function to attempt solving partially completed sudoku board, given list of 9 other lists of 9 ints or "." """
 def sudokuSolve(board: list[list[str]]):
 
+   temp_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
+
    for i in range(9):
 
       for j in range(9): #look through board until first period is found
 
+         newValWorks = False #define this value as false every time a new value is checked
+
          if (board[i][j] == "."): #if found a period, replace it with a number and check validity
 
-            for x in range(1,10):
+            while (newValWorks == False): 
+            #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
 
-               board[i][j] = x #assign empty space to a number 1-9 and then check validity to see if worth keeping
+               for x in range(1,10):
 
-               validityChecker(board)
+                  temp_board[i][j] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
 
+                  if (validityChecker(temp_board) == True):
+                     #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                     board[i][j] = str(x) #actually change board and then trigger while loop to end
+                     #pprint.pprint(temp_board)
+                     pprint.pprint(board)
+                     newValWorks = True
+                     break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
 
+                  elif (validityChecker(temp_board) == False and x == 9):
 
+                     deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                     print(f"\nSorry, dead end reached at row {i}, col {j}, exiting loop and closing program...\nFinal Board: \n")
+                     pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                     return
+
+               #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+   #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
 
 
