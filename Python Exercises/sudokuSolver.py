@@ -151,70 +151,480 @@ def validityChecker(board: list[list[str]]) -> bool:
             
                if (item == box[p]):
 
-                  print(f"\n Duplicate value in SUB-BOX, at BOX: {m} and item: {n}, where val = {item}, and box[{n}][{p}] = {box[p]}" )
+                  print(f"\n Duplicate value in SUB-BOX, at BOX: {m} and item: {n}, where val = {item}, and box[{n}][{p}] = {box[p]}\n" )
 
                   return False
    
    #if the entire board matrix is gone through and no duplicates were found, return true      
    return True   
 
+"""Function to attempt finding the best empty cell to start from, starting with row or col with least amount of numbers, then sub-box if desparate? """
+def findEasiestStart(board: list[list[str]]):
+
+   possible_vals = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] #need list of values to try in the empty cells later (to be sent to solver funcs later)
+
+   filledRowsBoard = [ [], [], [], [], [], [], [], [], [] ] #need new list to store lists of all the values in each row, at least 9 since there is one val in every box
+   filledColsBoard = [ [], [], [], [], [], [], [], [], [] ] #need new list to store lists of all the values in each column, at least 9 since there is one val in every box
+
+   filledSubBox = [ [], [], [], [], [], [], [], [], [] ] #need new list to store lists of all the values in each sub-box, at least 9 since there is one val in every box
+
+   boardMinusFilledRows = [ [], [], [], [], [], [], [], [], [] ]
+   boardMinusFilledCols = [ [], [], [], [], [], [], [], [], [] ]
+   boardMinusFilledBoxes = [ [], [], [], [], [], [], [], [], [] ]
+
+   tempBiggestRow = None
+   tempBiggestCol = None
+   tempBiggestBox = None
+
+   #Gets the list which represents each row of the board as row, i will function as index of rows inside board
+   for i, row in enumerate(board): 
+        
+      #need to get every value inside of each row as val, j is index of vals inside each row
+      for j, val in enumerate(row):  #look through board until first period is found
+
+         if (board[i][j] != "."): #if val is NOT a period, put it in list to compare lists 
+
+            #ROW CHECK val and place all real values in a list  ========================================================================================================= ROW
+            #so put every real value we find in each row into a list for the rows
+            filledRowsBoard[i].append(board[i][j])
+            boardMinusFilledRows[i].append(board[i][j])
+
+            #COL CHECK val and place all real values in a list  ========================================================================================================= COL
+            #so put every real value we find in each col into a list for the rows
+            filledColsBoard[j].append(board[i][j])
+            boardMinusFilledCols[j].append(board[i][j])
+
+            #SUB-BOX CHECK val and place all real values in a list for each sub-box  ==================================================================================== SUB-BOX
+            index = (i // 3) * 3 + (j // 3) #use floor division to get index of which sub-box to put each val in
+            filledSubBox[index].append(board[i][j])
+            boardMinusFilledBoxes[index].append(board[i][j])
+
+   print("\n Rows: \n")
+   pprint.pprint(filledRowsBoard)
+   print("\n Columns: \n")
+   pprint.pprint(filledColsBoard)
+   print("\n Boxes: \n")
+   pprint.pprint(filledSubBox)
+
+   print("\n Minus Rows: \n")
+   pprint.pprint(boardMinusFilledRows)
+   print("\n Minus Columns: \n")
+   pprint.pprint(boardMinusFilledCols)
+   print("\n Minus Boxes: \n")
+   pprint.pprint(boardMinusFilledBoxes)
+
+   #once all the lists are filled, we need to count the lengths and get the list with the highest amount of values filled in to use as our starting point
+   #WE WANT ONLY LISTS THAT ARE NOT FILLED, so limit max to be less than 9
+   biggestRow = max(filledRowsBoard, key=len)
+   indexBiggestRow = filledRowsBoard.index(biggestRow)
+
+   while (len(biggestRow) == 9 ): #if biggest row is now 9 AS IN IT HAS BEEN FILLED, then we need to find the next biggest row
+
+      removedRow = boardMinusFilledRows.pop(indexBiggestRow) #remove the biggest row we found in order to find the next biggest
+
+      tempBiggestRow = max(boardMinusFilledRows, key=len) #get new biggest in line from list without the filled row
+
+      #filledRowsBoard.insert(indexBiggestRow, removedRow) #re-insert previous row so that the indexes match up
+
+      indexBiggestRow = filledRowsBoard.index(tempBiggestRow) #set index of row in original list of rows to send to solver
+
+      biggestRow = tempBiggestRow #change biggest row if needed
+
+   biggestCol = max(filledColsBoard, key=len)
+   indexBiggestCol = filledColsBoard.index(biggestCol)
+
+   while (len(biggestCol) == 9 ): #if biggest col is now 9 AS IN IT HAS BEEN FILLED, then we need to find the next biggest col
+
+      del boardMinusFilledCols[indexBiggestCol] #remove the biggest row we found in order to find the next biggest
+
+      tempBiggestCol = max(boardMinusFilledCols, key=len) #get new biggest in line from list without the filled col
+
+      #filledColsBoard.insert(indexBiggestCol, removedCol) #re-insert previous col so that the indexes match up
+
+      indexBiggestCol = filledColsBoard.index(tempBiggestCol) #set index of col in original list of cols to send to solver
+
+      biggestCol = tempBiggestCol #change biggest col if needed
+
+
+   biggestBox = max(filledSubBox, key=len)
+   indexBiggestBox = filledSubBox.index(biggestBox)
+
+   while (len(biggestBox) == 9 ): #if biggest box is now 9 AS IN IT HAS BEEN FILLED, then we need to find the next biggest box
+
+      removedBox = boardMinusFilledBoxes.pop(indexBiggestBox) #remove the biggest box we found in order to find the next biggest
+
+      tempBiggestBox = max(boardMinusFilledBoxes, key=len) #get new biggest in line from list without the filled box
+
+      #filledSubBox.insert(indexBiggestBox, removedBox) #re-insert previous col so that the indexes match up
+
+      indexBiggestBox = filledSubBox.index(tempBiggestBox) #set index of box in original list of boxes to send to solver
+
+      biggestBox = tempBiggestBox #change biggest col if needed
+
+
+   #print(f"Biggest Row: {indexBiggestRow}, with length of {len(biggestRow)}, Biggest Column: {indexBiggestCol}, with length of {len(biggestCol)}, Biggest Box: {indexBiggestBox}, with length of {len(biggestBox)}")
+   
+   #get biggest val of the three, then get the coordinate of it to determine where to start changing values in sudokuSolve()
+   if (len(biggestRow) >= len(biggestCol) and len(biggestRow) >= len(biggestBox)): #================================================================ BIGGEST ROW
+      print(f"\n Start with Row {indexBiggestRow}, since it is the biggest or equal to biggest list, with a value of {len(biggestRow)}.")
+
+      #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
+      remainingVals = [item for item in possible_vals if item not in filledRowsBoard[indexBiggestRow]]
+      print(f" Row Contains: {filledRowsBoard[indexBiggestRow]}\n Remaining Values: {remainingVals}\n")
+
+      sudokuSolveRow(board, indexBiggestRow, remainingVals)
+
+      print("\n Row: ",indexBiggestRow, " was solved. Returning to main func.")
+
+   elif (len(biggestCol) >= len(biggestRow) and len(biggestCol) >= len(biggestBox)): #============================================================== BIGGEST COL
+      print(f"\n Start with Col {indexBiggestCol}, since it is the biggest or equal to biggest list, with a value of {len(biggestCol)}.")
+
+      #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
+      remainingVals = [item for item in possible_vals if item not in filledColsBoard[indexBiggestCol]]
+      print(f" Column Contains: {filledColsBoard[indexBiggestCol]}\n Remaining Values: {remainingVals}\n")
+
+      sudokuSolveCol(board, indexBiggestCol, remainingVals)
+
+      print("\n Column: ",indexBiggestCol, " was solved. Returning to main func.")
 
 
 
+   elif (len(biggestBox) >= len(biggestRow) and len(biggestBox) >= len(biggestCol)): #=============================================================== BIGGEST BOX
+      print(f"\n Start with Box {indexBiggestBox}, since it is the biggest or equal to biggest list, with a value of {len(biggestBox)}.")
+
+      #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
+      remainingVals = [item for item in possible_vals if item not in filledBoxBoard[indexBiggestBox]]
+      print(f" Box Contains: {filledBoxBoard[indexBiggestBox]}\n Remaining Values: {remainingVals}\n")
+
+      sudokuSolveBox(board, indexBiggestBox, remainingVals)
+
+      print("\n Box: ",indexBiggestBox, " was solved. Returning to main func.")
 
 
 
+"""Function to attempt solving partially completed sudoku board, given list of 9 other lists of 9 ints or ".", as well as the index of the row with the most filled cells in the board already"""
+def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals):
 
+   temp_row_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
+   board_backup = copy.deepcopy(board) #create copy of board in order to go back to if deadend is reached
 
-"""Function to attempt solving partially completed sudoku board, given list of 9 other lists of 9 ints or "." """
-def sudokuSolve(board: list[list[str]]):
+   for j in range(9): #look through board until first period is found
 
-   temp_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
+      newRowValWorks = False #define this value as false every time a new value is checked
+      deadEnd = False #if deadEnd is found, then stop trying current order of values
 
-   for i in range(9):
+      if (board[bigRowIndex][j] == "."): #find every period in the row sent to be solved
 
-      for j in range(9): #look through board until first period is found
+         while (newRowValWorks == False and deadEnd == False): 
+         #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
 
-         newValWorks = False #define this value as false every time a new value is checked
+            for index, x in enumerate(startingVals):
 
-         if (board[i][j] == "."): #if found a period, replace it with a number and check validity
+               temp_row_board[bigRowIndex][j] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
 
-            while (newValWorks == False): 
-            #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
+               tRowBoardIsValid = validityChecker(temp_row_board) #pass temp board once so that it doesnt run every if statement below
 
-               for x in range(1,10):
+               if (tRowBoardIsValid == True):
+                  #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                  board[bigRowIndex][j] = str(x) #actually change board and then trigger while loop to end
+                  #pprint.pprint(temp_board)
+                  pprint.pprint(board)
+                  newRowValWorks = True
+                  break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
 
-                  temp_board[i][j] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
+               elif (tRowBoardIsValid == False and index == (len(startingVals)-1) and j != 8):
 
-                  if (validityChecker(temp_board) == True):
-                     #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
-                     board[i][j] = str(x) #actually change board and then trigger while loop to end
-                     #pprint.pprint(temp_board)
-                     pprint.pprint(board)
-                     newValWorks = True
-                     break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
+                  deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                  print(f"\n Sorry, dead end reached at row {bigRowIndex}, col {j}, exiting loop and closing program...\n Final Board: \n")
+                  pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
-                  elif (validityChecker(temp_board) == False and x == 9):
+                  temp_row_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different numbers again
+                  board = copy.deepcopy(board_backup)
+                  newStart = startingVals[1:] + startingVals[:1] #need to start next loop at next number in starting vals list to get different combo of 9 letters for the row
 
-                     deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
-                     print(f"\nSorry, dead end reached at row {i}, col {j}, exiting loop and closing program...\nFinal Board: \n")
-                     pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+                  print("\n Starting Values: ",startingVals, "\n NewStart: ", newStart, "\n")
 
-                     return
+                  sudokuSolveRow(board, bigRowIndex, newStart)
 
-               #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+                  return #exit for loop so that it doesn't try any more values after dead end is reached
+
+               elif (tRowBoardIsValid == False and index == (len(startingVals)-1) and j == 8):
+
+                  noSolutionFound = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                  print(f"\n Sorry, no solution found for the row {bigRowIndex}, exiting program...\n Final Board: \n")
+                  pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                  return 
+
+            #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+      #AFTER WHILE LOOP AND FOR LOOP ENDS, should only run on final lap of for loop since j == 8
+      #if end of row and end of possible inputs is reached, and board is valid, then row must be correct, so print out correct version of board and return to exit func
+      if (board[bigRowIndex][j] != "." and j == 8):
+         print(f"\n Row completed! Sending board to next starting point...\n New Board Being Sent: \n")
+         pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+         findEasiestStart(board)
 
    #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
 
+"""Function to attempt solving partially completed sudoku board, given list of 9 other lists of 9 ints or ".", as well as the index of the row with the most filled cells in the board already"""
+def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals):
 
+   temp_col_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
+   board_backup = copy.deepcopy(board) #create copy of board in order to go back to if deadend is reached
 
+   for i in range(9): #look through board until first period is found
 
+      newColValWorks = False #define this value as false every time a new value is checked
+      deadEnd = False #if deadEnd is found, then stop trying current order of values
 
+      if (board[i][bigColIndex] == "."): #find every period in the col sent to be solved
 
+         while (newColValWorks == False and deadEnd == False): 
+         #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
 
+            for index, x in enumerate(startingVals):
 
+               temp_col_board[i][bigColIndex] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
 
+               tColBoardIsValid = validityChecker(temp_col_board) #pass temp board once so that it doesnt run every if statement below
+
+               if (tColBoardIsValid == True):
+                  #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                  board[i][bigColIndex] = str(x) #actually change board and then trigger while loop to end
+                  #pprint.pprint(temp_board)
+                  pprint.pprint(board)
+                  newColValWorks = True
+                  break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
+
+               elif (tColBoardIsValid == False and index == (len(startingVals)-1) and i != 8):
+
+                  deadEnd = True #if we tried all possible numbers 1-9 and board is not coming out right, trigger the dead end and try new numbers?
+                  print(f"\n Sorry, dead end reached at row {i}, col {bigColIndex}, exiting loop and trying next combo...\n Dead End Board: \n")
+                  pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                  temp_col_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different numbers again
+                  board = copy.deepcopy(board_backup)
+                  newStart = startingVals[1:] + startingVals[:1] #need to start next loop at next number in starting vals list to get different combo of 9 letters for the column
+
+                  print("\n Starting Values: ",startingVals, "\n NewStart: ", newStart, "\n")
+
+                  sudokuSolveCol(board, bigColIndex, newStart)
+
+                  return #exit for loop so that it doesn't try any more values after dead end is reached
+
+               elif (tColBoardIsValid == False and index == (len(startingVals)-1) and i == 8):
+
+                  noSolutionFound = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                  print(f"\n Sorry, no solution found for the column {bigColIndex}, exiting program...\n Final Board: \n")
+                  pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                  return 
+
+            #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+      #AFTER WHILE LOOP ENDS, not for loop, should only run on final lap of for loop since i == 8
+      #if end of column and end of possible inputs is reached, and board is valid, then column must be correct, so print out correct version of board and return to exit func
+      if (board[i][bigColIndex] != "." and i == 8):
+         print(f"\n Column completed! Sending board to next starting point...\n New Board Being Sent: \n")
+         pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+         findEasiestStart(board)
+
+                  
+   #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+"""Function to attempt solving partially completed sudoku board, given list of 9 other lists of 9 ints or ".", as well as the index of the row with the most filled cells in the board already"""
+def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals):
+
+   temp_box_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
+   board_backup = copy.deepcopy(board) #create copy of board in order to go back to if deadend is reached
+
+   for m in range(3): #look through box until first period is found
+
+      for n in range(3): 
+
+         newBoxValWorks = False #define this value as false every time a new value is checked
+         deadEnd = False #if deadEnd is found, then stop trying current order of values
+         box_MIndex = 0 #define early so can use later
+         box_NIndex = 0 #define early so can use later
+
+         if (bigBoxIndex == 0 or bigBoxIndex == 3 or bigBoxIndex == 6):
+
+            box_MIndex = bigBoxIndex + m #need coordinates to start at (0,0), (3,0), or (6,0)
+
+            if (board[box_MIndex][n] == "."): #find every period in the box sent to be solved
+
+               while (newBoxValWorks == False and deadEnd == False): 
+               #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
+
+                  for index, x in enumerate(startingVals):
+
+                     temp_box_board[box_MIndex][n] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
+
+                     tBoxBoardIsValid = validityChecker(temp_box_board) #pass temp board once so that it doesnt run every if statement below
+
+                     if (tBoxBoardIsValid == True):
+                        #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                        board[box_MIndex][n] = str(x) #actually change board and then trigger while loop to end
+                        #pprint.pprint(temp_board)
+                        pprint.pprint(board)
+                        newBoxValWorks = True
+                        break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
+
+                     elif (tBoxBoardIsValid == False and index == (len(startingVals)-1) and m != 2):
+
+                        deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                        print(f"\n Sorry, dead end reached at box {box_MIndex}, col {n}, exiting loop and closing program...\n Final Board: \n")
+                        pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                        temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different numbers again
+                        board = copy.deepcopy(board_backup)
+                        newStart = startingVals[1:] + startingVals[:1] #need to start next loop at next number in starting vals list to get different combo of 9 letters for the row
+
+                        print("\n Starting Values: ",startingVals, "\n NewStart: ", newStart, "\n")
+
+                        sudokuSolveBox(board, bigBoxIndex, newStart)
+
+                        return #exit for loop so that it doesn't try any more values after dead end is reached
+
+                     elif (tBoxBoardIsValid == False and index == (len(startingVals)-1) and j == 8):
+
+                        noSolutionFound = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                        print(f"\n Sorry, no solution found for the box {bigBoxIndex}, exiting program...\n Final Board: \n")
+                        pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                        return 
+
+                  #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+            #AFTER WHILE LOOP AND FOR LOOP ENDS, should only run on final lap of for loop since m == 2
+            #if end of box and end of possible inputs is reached, and board is valid, then row must be correct, so print out correct version of board and return to exit func
+            if (board[box_MIndex][n] != "." and m == 2):
+               print(f"\n Box completed! Sending board to next starting point...\n New Board Being Sent: \n")
+               pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+               findEasiestStart(board)
+
+         elif (bigBoxIndex == 1 or bigBoxIndex == 4 or bigBoxIndex == 7):
+
+            box_MIndex = m + (bigBoxIndex - 1) #need coordinates to start at (0,3), (3,3), or (6,3)
+            box_NIndex = 3 + n #need coordinates to start at (0,3), (3,3), or (6,3)
+
+            if (board[box_MIndex][box_NIndex] == "."): #find every period in the box sent to be solved
+
+               while (newBoxValWorks == False and deadEnd == False): 
+               #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
+
+                  for index, x in enumerate(startingVals):
+
+                     temp_box_board[box_MIndex][box_NIndex] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
+
+                     tBoxBoardIsValid = validityChecker(temp_box_board) #pass temp board once so that it doesnt run every if statement below
+
+                     if (tBoxBoardIsValid == True):
+                        #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                        board[box_MIndex][box_NIndex] = str(x) #actually change board and then trigger while loop to end
+                        #pprint.pprint(temp_board)
+                        pprint.pprint(board)
+                        newBoxValWorks = True
+                        break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
+
+                     elif (tBoxBoardIsValid == False and index == (len(startingVals)-1) and m != 2):
+
+                        deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                        print(f"\n Sorry, dead end reached at box {bigBoxIndex}, at row {box_MIndex}, col {box_NIndex}, exiting loop and closing program...\n Final Board: \n")
+                        pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                        temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different numbers again
+                        board = copy.deepcopy(board_backup)
+                        newStart = startingVals[1:] + startingVals[:1] #need to start next loop at next number in starting vals list to get different combo of 9 letters for the row
+
+                        print("\n Starting Values: ",startingVals, "\n NewStart: ", newStart, "\n")
+
+                        sudokuSolveRow(board, bigBoxIndex, newStart)
+
+                        return #exit for loop so that it doesn't try any more values after dead end is reached
+
+                     elif (tBoxBoardIsValid == False and index == (len(startingVals)-1) and m == 2):
+
+                        noSolutionFound = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                        print(f"\n Sorry, no solution found for the box {bigBoxIndex}, exiting program...\n Final Board: \n")
+                        pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                        return 
+
+                  #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+            #AFTER WHILE LOOP AND FOR LOOP ENDS, should only run on final lap of for loop since m == 2
+            #if end of box and end of possible inputs is reached, and board is valid, then row must be correct, so print out correct version of board and return to exit func
+            if (board[box_MIndex][box_NIndex] != "." and m == 2):
+               print(f"\n Box completed! Sending board to next starting point...\n New Board Being Sent: \n")
+               pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+               findEasiestStart(board)
+
+         elif (bigBoxIndex == 2 or bigBoxIndex == 5 or bigBoxIndex == 8):
+
+            box_MIndex = m + (bigBoxIndex - 2) #need coordinates to start at (0,6), (3,6), or (6,6)
+            box_NIndex = 6 + n 
+
+            if (board[box_MIndex][box_NIndex] == "."): #find every period in the box sent to be solved
+
+               while (newBoxValWorks == False and deadEnd == False): 
+               #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
+
+                  for index, x in enumerate(startingVals):
+
+                     temp_box_board[box_MIndex][box_NIndex] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
+
+                     tBoxBoardIsValid = validityChecker(temp_box_board) #pass temp board once so that it doesnt run every if statement below
+
+                     if (tBoxBoardIsValid == True):
+                        #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                        board[box_MIndex][box_NIndex] = str(x) #actually change board and then trigger while loop to end
+                        #pprint.pprint(temp_board)
+                        pprint.pprint(board)
+                        newBoxValWorks = True
+                        break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
+
+                     elif (tBoxBoardIsValid == False and index == (len(startingVals)-1) and m != 2):
+
+                        deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                        print(f"\n Sorry, dead end reached at box {bigBoxIndex}, at row {box_MIndex}, col {box_NIndex}, exiting loop and closing program...\n Final Board: \n")
+                        pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                        temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different numbers again
+                        board = copy.deepcopy(board_backup)
+                        newStart = startingVals[1:] + startingVals[:1] #need to start next loop at next number in starting vals list to get different combo of 9 letters for the row
+
+                        print("\n Starting Values: ",startingVals, "\n NewStart: ", newStart, "\n")
+
+                        sudokuSolveRow(board, bigBoxIndex, newStart)
+
+                        return #exit for loop so that it doesn't try any more values after dead end is reached
+
+                     elif (tBoxBoardIsValid == False and index == (len(startingVals)-1) and m == 2):
+
+                        noSolutionFound = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                        print(f"\n Sorry, no solution found for the box {bigBoxIndex}, exiting program...\n Final Board: \n")
+                        pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                        return 
+
+                  #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+            #AFTER WHILE LOOP AND FOR LOOP ENDS, should only run on final lap of for loop since m == 2
+            #if end of box and end of possible inputs is reached, and board is valid, then row must be correct, so print out correct version of board and return to exit func
+            if (board[box_MIndex][box_NIndex] != "." and m == 2):
+               print(f"\n Box completed! Sending board to next starting point...\n New Board Being Sent: \n")
+               pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+               findEasiestStart(board)
+
+   #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
 def main():
    print("=" * 50)
@@ -237,7 +647,8 @@ def main():
 
    print("\n Output:") #print output of validity of board1
    print("-" * 50)
-   print("\n", sudokuSolve(board1))
+   #print("\n", sudokuSolve(board1))
+   print("\n", findEasiestStart(board1))
    #print("\n", validityChecker(board1)) #send board1 to validity checker func to return if it is valid or not
 
 
@@ -282,3 +693,54 @@ def main():
    """
 if __name__ == "__main__":
    main()
+
+
+
+
+
+
+
+
+
+
+"""
+def sudokuSolve(board: list[list[str]]):
+
+   temp_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
+
+   for i in range(9):
+
+      for j in range(9): #look through board until first period is found
+
+         newValWorks = False #define this value as false every time a new value is checked
+
+         if (board[i][j] == "."): #if found a period, replace it with a number and check validity
+
+            while (newValWorks == False): 
+            #find empty cell, put a number in and see if it works, once one works leave loop and check next cell in board
+
+               for x in range(1,10):
+
+                  temp_board[i][j] = str(x) #assign empty space to a number 1-9 and then check validity to see if worth keeping
+
+                  if (validityChecker(temp_board) == True):
+                     #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
+                     board[i][j] = str(x) #actually change board and then trigger while loop to end
+                     #pprint.pprint(temp_board)
+                     pprint.pprint(board)
+                     newValWorks = True
+                     break #exit for loop to force while loop to realize that newValWorks has changed, which will then end up moving forward to the next "." to fill and then check, and so on
+
+                  elif (validityChecker(temp_board) == False and x == 9):
+
+                     deadEnd = True #if we tried all 9 numbers and board is not coming out right, trigger the dead end and try new numbers?
+                     print(f"\nSorry, dead end reached at row {i}, col {j}, exiting loop and closing program...\nFinal Board: \n")
+                     pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+                     return
+
+               #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+   #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+"""
