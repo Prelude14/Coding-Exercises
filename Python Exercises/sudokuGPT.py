@@ -72,3 +72,23 @@ def main():
 
 if __name__ == "__main__":
    main()
+
+
+
+   """
+
+
+   3 4 5 no
+
+   3 5 4 no
+
+   4 3 5 works
+
+   4 5 3 also works
+
+   5 3 4 no
+
+   5 4 3 also works
+   
+
+   """
