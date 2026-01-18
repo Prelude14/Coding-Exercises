@@ -304,7 +304,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the row
 
-      sudokuSolveRow(board, indexBiggestRow, allPossibleVals, 0, [ [] ], 0, skipRows, skipCols, skipBoxes)
+      sudokuSolveRow(board, indexBiggestRow, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
 
       print("\n Row: ",indexBiggestRow, " was attemped...Returning to main func.")
 
@@ -317,7 +317,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the column
 
-      sudokuSolveCol(board, indexBiggestCol, allPossibleVals, 0, [ [] ], 0, skipRows, skipCols, skipBoxes)
+      sudokuSolveCol(board, indexBiggestCol, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
 
       print("\n Column: ",indexBiggestCol, " was attemped...Returning to main func.")
 
@@ -343,9 +343,9 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
    temp_row_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
    board_backup = copy.deepcopy(board) #create copy of board in order to go back to if deadend is reached
 
-   tempPossibleRow = [ [ ] ]
+   tempPossibleRow = [ ]
 
-   print("\n Starting Values at beginning of SolveRow: ",startingVals[deadEndCount])
+   print("\n Starting Values at beginning of SolveRow: ",startingVals[deadEndCount], "DeadEndCount:",deadEndCount)
 
    for j in range(9): #look through board until first period is found
 
@@ -389,16 +389,26 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
                      print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
 
                      #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
-                     sudokuSolveRow(board, bigRowIndex, startingVals, deadEndCount, possibleRowOrder, pRowOrderCount, skipRows, skipCols, skipBoxes ) 
+                     possibleRowOrder = sudokuSolveRow(board, bigRowIndex, startingVals, deadEndCount, possibleRowOrder, pRowOrderCount, skipRows, skipCols, skipBoxes ) 
 
                      return possibleRowOrder #exit function after returning from recursive solveRow call, so that it doesn't try any more values after dead end is reached
 
-                  elif (deadEndCount > (len(startingVals)-1) and pRowOrderCount == 0): 
-                     #if we have tried the last value in the last combo of values, we need to quit since we have run out of possible combinations to try
+                  elif (deadEndCount > (len(startingVals)-1) and pRowOrderCount == 0): #if we finish trying a combo before we get to the last item in the row, and we are out of combos
+                     #if we have tried the last value in the last combo of values, and we have 0 possible solutions, we need to quit since we have run out of possible combinations to try
                      print("\n Sorry! We have tried every possible combination of values on row ", bigRowIndex, ".\n This means the board is not solvable, or that we made a mistake somewhere.\n")
                      print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
 
-                     return possibleRowOrder #exit function without calling solveRow again, since we have reached a full deadend
+                     return possibleRowOrder #exit function without calling solveRow again, since we have reached a full deadend without any solutions
+
+                  elif (deadEndCount > (len(startingVals)-1) and pRowOrderCount > 0): #if we finish trying a combo before we get to the last item in the row, and we are out of combos (j < 8)
+                     #AND we have more than one possible solution, we need to properly return said list of solutions
+                     print("\n We have now tried every possible combination of values on row", bigRowIndex, "\n")
+                     print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
+
+                     break 
+                     #if deadendCount maxed but we have solutions, we need to break from this for loop, which will break while loop, and then on the last check of j with full deadEndCount, 
+                     #we will pick a combo. NOTE: if deadEndCount max hit before j is through entire row and the row ends in an empty cell, the ifs that this will go to won't work, since
+                     #they need the last item in the row to be a actual number and not a "."
 
                elif (tRowBoardIsValid == False and index == (len(startingVals[deadEndCount])-1) and j == 8 and deadEndCount == len(startingVals) ):
 
@@ -406,7 +416,7 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
                   print(f"\n Sorry, no solution found for the row {bigRowIndex}, exiting program...\n Final Board: \n")
                   pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
-                  return  possibleRowOrder
+                  return possibleRowOrder
 
          if (deadEndCount == len(startingVals) and pRowOrderCount == 0):
 
@@ -431,9 +441,15 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
             tempPossibleRow.append(board[bigRowIndex][b]) #loop through the complete row and add each val to list tempPossibleRow to be then stored inside possibleRowOrder list
 
-         possibleRowOrder.append(tempPossibleRow) #add temp list to end of big list
+         if tempPossibleRow not in possibleRowOrder: #we only want to add possible row order if it is different than the rest of already saved possible orders
+            possibleRowOrder.append(tempPossibleRow) #add temp list to end of big list
 
-         pRowOrderCount += 1 #after adding the completed row order to the list, we need to increment this so next time a possible order is found in the next call to this function, it can be added properly
+            pRowOrderCount += 1 
+            #after adding the UNIQUE completed row order to the list, we need to increment this so next time a possible order is found in the next call to this function, it can be added properly
+
+         elif tempPossibleRow in possibleRowOrder:
+
+            print("\n Oh! It looks like that possible order has already been saved to the list, so we aren't saving it, moving on... ")
 
          board = copy.deepcopy(board_backup) #re write regular board back to starting point to try different order of numbers again
          
@@ -441,17 +457,21 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
          deadEndCount += 1
 
          if (deadEndCount != len(startingVals) ):
-            print("\n Checking next possible combination by sending updated deadEndCount to SolveRow recursively...")
+            print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveRow recursively...")
             #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
             allOrders = sudokuSolveRow(board, bigRowIndex, startingVals, deadEndCount, possibleRowOrder, pRowOrderCount, skipRows, skipCols, skipBoxes) 
 
-            print("\n After saving possible row order",pRowOrderCount,",we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+            print("\n After saving possible row order",pRowOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+
+            return allOrders #need to return the list of possible rows after 
 
          elif (deadEndCount == len(startingVals) ):
 
-            print("\n So the row has finished checking every possible combination, it found", pRowOrderCount, "possible rows...")
+            print("\n So the row has finished checking every possible combination, it found", pRowOrderCount, "possible row order(s)...")
 
-            if (len(possibleRowOrder) > 1):
+            print(f"\n PossibleRowOrder: {possibleRowOrder}")
+
+            if (pRowOrderCount > 1):
 
                print(f"\n So row {bigRowIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
 
@@ -462,7 +482,12 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
                findEasiestStart(board, skipRows, skipCols, skipBoxes)
 
-            elif (len(possibleRowOrder) == 1):
+            elif (pRowOrderCount == 1):
+
+               #if row only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
+               for y in range(9):
+
+                  board[bigRowIndex][y] = possibleRowOrder[0][y] #re save only solution to board before sending the board with the completed row to next start
 
                print(f"\n Row completed with only possible combination! Sending board to next starting point...\n New Board Being Sent: \n")
                pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
@@ -475,7 +500,7 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
          print(f"\n All possible orders of values for this row have been found...\n Checking if more than 2... There are", pRowOrderCount)
 
-         if (len(possibleRowOrder) > 1):
+         if (pRowOrderCount > 1):
 
             print(f"\n So row: {bigRowIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
 
@@ -486,12 +511,50 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
             findEasiestStart(board, skipRows, skipCols, skipBoxes)
 
-         elif (len(possibleRowOrder) == 1):
+         elif (pRowOrderCount == 1):
+
+            #if row only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
+            for z in range(9):
+
+               board[bigRowIndex][z] = possibleRowOrder[0][z] #re save only solution to board before sending the board with the completed row to next start
 
             print(f"\n Row completed with only possible combination! Sending board to next starting point...\n New Board Being Sent: \n")
             pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
             findEasiestStart(board, skipRows, skipCols, skipBoxes)
+
+      #if we have tried all possible orders of starting vals, then we should have every possible order in the possibleRowOrder list, AND THE DEADENDCOUNT IS MAXXED BEFORE FINISHING ROW
+      elif (deadEnd == True and j <= 8 and deadEndCount == len(startingVals) ):
+
+         print(f"\n All possible orders of values for this row have been tried...\n Checking how many possible... There are", pRowOrderCount)
+
+         if (pRowOrderCount > 1):
+
+            print(f"\n So row: {bigRowIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
+
+            skipRows.append(bigRowIndex) #add this row to list of rows for easiestStart func to skip when choosing starting position
+
+            temp_row_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different row, col, or box
+            board = copy.deepcopy(board_backup)
+
+            findEasiestStart(board, skipRows, skipCols, skipBoxes)
+
+         elif (pRowOrderCount == 1):
+
+            #if row only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
+            for q in range(9):
+
+               board[bigRowIndex][q] = possibleRowOrder[0][q] #re save only solution to board before sending the board with the completed row to next start
+
+            print(f"\n Row completed with only possible combination after checking every single combo! Sending board to next starting point...\n New Board Being Sent: \n")
+            pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+            findEasiestStart(board, skipRows, skipCols, skipBoxes)
+
+         elif (pRowOrderCount < 1):
+
+            print(f"\n Sorry, no possible combinations found for row {bigRowIndex} after trying all possible permutations and reaching a dead end before the end of said row,\n while the end of the row contains a '.' still...\n")
+            return possibleRowOrder
 
    #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
@@ -502,7 +565,7 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
    temp_col_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
    board_backup = copy.deepcopy(board) #create copy of board in order to go back to if deadend is reached
 
-   tempPossibleCol = [ [ ] ]
+   tempPossibleCol = [  ]
 
    print("\n Starting Values at beginning of SolveCol:",startingVals[deadEndCount], "DeadEndCount:",deadEndCount)
 
@@ -557,6 +620,14 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
                      print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
                      return possibleColOrder #exit function since we have reached a full deadend
 
+                  elif (deadEndCount > (len(startingVals)-1) and pColOrderCount > 0): #if we finish trying a combo before we get to the last item in the col, and we are out of combos (i < 8)
+                     #AND we have more than one possible solution, we need to properly return said list of solutions
+                     print("\n We have now tried every possible combination of values on col", bigColIndex, ".\n")
+                     print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
+
+                     break 
+                     #if deadend hit but we have solutions, we need to break from this for loop, which will break while loop, and then on the last check of j with full deadEndCount, we will pick a combo
+
                elif (tColBoardIsValid == False and index == (len(startingVals[deadEndCount])-1) and i == 8 and deadEndCount == len(startingVals) ):
 
                   noSolutionFound = True #if we tried all possible combinations of the values avaliable, and board is not coming out right, trigger the dead end and try new numbers?
@@ -587,9 +658,17 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
             tempPossibleCol.append(board[b][bigColIndex]) #loop through the complete col and add each val to list tempPossibleCol to be then stored inside possibleColOrder list
 
-         possibleColOrder.append(tempPossibleCol) #add temp list to end of big list
+         if tempPossibleCol not in possibleColOrder: #we only want to add possible col order if it is different than the rest of already saved possible orders
+            possibleColOrder.append(tempPossibleCol) #add temp list to end of big list
 
-         pColOrderCount += 1 #after adding the completed col order to the list, we need to increment this so next time a possible order is found in the next call to this function, it can be added properly
+            pColOrderCount += 1 
+            #after adding the UNIQUE completed col order to the list, we need to increment this so next time a possible order is found in the next call to this function, it can be added properly
+            print(f" Unique solution found...tempPossibleCol: {tempPossibleCol}\n PossibleColOrder: {possibleColOrder}\n pOrderCount: {pColOrderCount}")
+
+         elif tempPossibleCol in possibleColOrder:
+
+            print("\n Oh! It looks like that possible order has already been saved to the list, so we aren't saving it, moving on... ")
+
 
          board = copy.deepcopy(board_backup) #re write regular board back to starting point to try different order of numbers again
 
@@ -598,16 +677,18 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
          deadEndCount += 1
 
          if (deadEndCount != len(startingVals) ):
-            print("\nChecking next possible combination by sending updated deadEndCount to SolveCol recursively...")
+            print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveCol recursively...")
             allOrders = sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skipRows, skipCols, skipBoxes) 
 
             print("\n After saving possible col order",pColOrderCount,"we have checked the rest of the startingvals and finished with ", len(allOrders), "possible orders...")
 
-         elif (deadEndCount == len(startingVals) ):
+         elif (deadEndCount == len(startingVals) ): #if we have no more permutations to check after attempting to save the last possible order, we need to decide to fill the board or not
 
-            print("\n So the column has finished checking every possible combination, it found", pColOrderCount, "possible columns...")
+            print("\n So the column has finished checking every possible combination, it found", pColOrderCount, "possible column order(s)...")
 
-            if (len(possibleColOrder) > 1):
+            print(f"\n PossibleColOrder: {possibleColOrder}")
+
+            if (pColOrderCount > 1):
 
                print(f"\n So column {bigColIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
 
@@ -618,7 +699,12 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
                findEasiestStart(board, skipRows, skipCols, skipBoxes)
 
-            elif (len(possibleColOrder) == 1):
+            elif (pColOrderCount == 1):
+               #if column only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
+               for y in range(9):
+
+                  board[y][bigColIndex] = possibleColOrder[0][y] #re save only solution to board before sending the board with the completed col to next start
+
 
                print(f"\n Column completed with only possible combination! Sending board to next starting point...\n New Board Being Sent: \n")
                pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
@@ -642,11 +728,48 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
             findEasiestStart(board, skipRows, skipCols, skipBoxes)
 
          elif (len(possibleColOrder) == 1):
+            #if column only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
+            for z in range(9):
+
+               board[z][bigColIndex] = possibleColOrder[0][z] #re save only solution to board before sending the board with the completed col to next start
 
             print(f"\n Column completed with only possible combination! Sending board to next starting point...\n New Board Being Sent: \n")
             pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
 
             findEasiestStart(board, skipRows, skipCols, skipBoxes)
+
+      #if we have tried all possible orders of starting vals, then we should have every possible order in the possibleRowOrder list, AND THE DEADENDCOUNT IS MAXXED BEFORE FINISHING ROW
+      elif (deadEnd == True and i <= 8 and deadEndCount == len(startingVals) ):
+
+         print(f"\n All possible orders of values for this col have been tried...\n Checking how many possible... There are", pColOrderCount)
+
+         if (pColOrderCount > 1):
+
+            print(f"\n So Col: {bigColIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
+
+            skipCols.append(bigColIndex) #add this Col to list of Cols for easiestStart func to skip when choosing starting position
+
+            temp_col_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different row, col, or box
+            board = copy.deepcopy(board_backup)
+
+            findEasiestStart(board, skipRows, skipCols, skipBoxes)
+
+         elif (pColOrderCount == 1):
+
+            #if Col only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
+            for q in range(9):
+
+               board[q][bigColIndex] = possibleColOrder[0][q] #re save only solution to board before sending the board with the completed Col to next start
+
+            print(f"\n Col completed with only possible combination after checking every single combo! Sending board to next starting point...\n New Board Being Sent: \n")
+            pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+
+            findEasiestStart(board, skipRows, skipCols, skipBoxes)
+
+         elif (pColOrderCount < 1):
+
+            print(f"\n Sorry, no possible combinations found for col {bigColIndex} after trying all possible permutations and reaching a dead end before the end of said col,\n while the end of the row contains a '.' still...\n")
+            return possibleColOrder
 
                   
    #pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
