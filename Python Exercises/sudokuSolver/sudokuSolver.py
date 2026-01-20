@@ -49,6 +49,8 @@ import copy #need a way to create an entirely new copy of the game board which w
 
 import itertools #need .permutations() in order to get each solver function to try every possible combo of numbers
 
+import sys #using sys.exit() once board is filled either correctly or incorrectly to avoid the backwards recursive calls
+
 def validityChecker(board: list[list[str]]) -> bool:
    
    #Going to create new empty list of 9 empty lists to store sub boxes for checking later
@@ -178,6 +180,12 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
    tempBiggestCol = None
    tempBiggestBox = None
 
+   rowsFilled = False
+   colsFilled = False
+   boxesFilled = False
+
+   potentiallyFinalBoardIsValid = None #none because it is deteremined by the validityChecker function
+
    #Gets the list which represents each row of the board as row, i will function as index of rows inside board
    for i, row in enumerate(board): 
         
@@ -222,10 +230,20 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       #filledRowsBoard.insert(indexBiggestRow, removedRow) #re-insert previous row so that the indexes match up
 
-      indexBiggestRow = filledRowsBoard.index(tempBiggestRow) #set index of row in original list of rows to send to solver
+      if (len(tempBiggestRow) != 0): #as long as the biggest row is not empty BEFORE SKIPS, if it is, the board is complete or we are out of rows to try
 
-      biggestRow = tempBiggestRow #change biggest row if needed
+         indexBiggestRow = filledRowsBoard.index(tempBiggestRow) #set index of row in original list of rows to send to solver
 
+         biggestRow = tempBiggestRow #change biggest row if needed
+
+      elif (len(tempBiggestRow) == 0): #if the biggest row is empty BEFORE SKIPS, it means we are out of rows to fill, they must all be filled at this point, since boardMinusRows will only contain the real values in each row or an empty list for each filled row
+
+         print(f"\n While checking for the biggest row that isn't filled before it skips any rows, it found an empty list to be the biggestRow, so it should mean that \n every row has been filled by this point, since it hasn't been told which rows to skip yet, its only empting every filled row...")
+
+         rowsFilled = True #trigger bool to be evaluated below
+
+         indexBiggestRow = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
+         biggestRow = tempBiggestRow #force biggest row to stay empty since we want the logic to check the column and box list for a bigger list to be sure that the board is full
 
    #if we found more than one option for a row, we want to skip those rows and find the biggest value again
    if (len(skipRows) > 0):
@@ -235,9 +253,18 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       tempBiggestRow = max(boardMinusFilledRows, key=len) #get new biggest in line from list without the skipped rows
 
-      indexBiggestRow = filledRowsBoard.index(tempBiggestRow) #set index of row in original list of rows to send to solver
+      if (len(tempBiggestRow) != 0): #as long as the biggest row is not empty AFTER SKIPS, if it is, the board is complete or we are out of rows to try
 
-      biggestRow = tempBiggestRow #change biggest row if needed
+         indexBiggestRow = filledRowsBoard.index(tempBiggestRow) #set index of row in original list of rows to send to solver
+
+         biggestRow = tempBiggestRow #change biggest row if needed
+
+      elif (len(tempBiggestRow) == 0): #if the biggest row is empty AFTER SKIPS, it means we are out of rows to fill, either they are filled or have been skipped at this point
+
+         print(f"\n While checking for the biggest row that isn't filled after skipping certain rows, it found an empty list to be the biggestRow, so either the board \n is complete or every row has been either filled or skipped due to multiple solutions existing when they were evaluated...")
+
+         indexBiggestRow = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
+         biggestRow = tempBiggestRow #force biggest row to stay empty since we want the logic to check the column and box list for a bigger list to be sure that the board is full
 
 
    biggestCol = max(filledColsBoard, key=len) #get biggest current column
@@ -251,9 +278,20 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       #filledColsBoard.insert(indexBiggestCol, removedCol) #re-insert previous col so that the indexes match up
 
-      indexBiggestCol = filledColsBoard.index(tempBiggestCol) #set index of col in original list of cols to send to solver
+      if (len(tempBiggestCol) != 0): #as long as the biggest col is not empty BEFORE SKIPS, if it is, the board is complete or we are out of cols to try
 
-      biggestCol = tempBiggestCol #change biggest col if needed
+         indexBiggestCol = filledColsBoard.index(tempBiggestCol) #set index of col in original list of cols to send to solver
+
+         biggestCol = tempBiggestCol #change biggest col if needed
+
+      elif (len(tempBiggestCol) == 0): 
+         # if the biggest col is empty BEFORE SKIPS, it means we are out of cols to fill, they must all be filled at this point, since boardMinusCols will only contain
+         # the real values in each col or an empty list for each filled col
+
+         print(f"\n While checking for the biggest col that isn't filled before it skips any cols, it found an empty list to be the biggestCol, so it should mean that \n every col has been filled by this point, since it hasn't been told which cols to skip yet, its only empting every filled col...")
+
+         indexBiggestCol = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
+         biggestCol = tempBiggestCol #force biggest col to stay empty since we want the logic to check the row and box list for a bigger list to be sure that the board is full
 
    #if we found more than one option for a col, we want to skip those cols and find the biggest value again
    if (len(skipCols) > 0):
@@ -263,10 +301,24 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       tempBiggestCol = max(boardMinusFilledCols, key=len) #get new biggest in line from list without the skipped cols
 
-      indexBiggestCol = filledColsBoard.index(tempBiggestCol) #set index of row in original list of rows to send to solver
+      if (len(tempBiggestCol) != 0): #as long as the biggest col is not empty AFTER SKIPS, if it is, the board is complete or we are out of cols to try
 
-      biggestCol = tempBiggestCol #change biggest row if needed
+         indexBiggestCol = filledColsBoard.index(tempBiggestCol) #set index of col in original list of cols to send to solver
 
+         biggestCol = tempBiggestCol #change biggest col if needed
+
+      elif (len(tempBiggestCol) == 0): 
+         # if the biggest col is empty AFTER SKIPS, it means we are out of cols to fill, they must all be filled at this point, since boardMinusCols will only contain
+         # the real values in each col or an empty list for each filled col
+
+         print(f"\n While checking for the biggest col that isn't filled after skipping certain cols, it found an empty list to be the biggestCol, \n so either the board is complete or every col has been either filled or skipped due to multiple solutions existing when they were evaluated...")
+
+         indexBiggestCol = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
+         biggestCol = tempBiggestCol #force biggest col to stay empty since we want the logic to check the row and box list for a bigger list to be sure that the board is full
+
+   """
+   # Had the logic to check boxes just like the row and col for a starting point, but commented out once I had changed the rows and cols code to work durastically different, 
+   # now is not needed  and is casuing index issues once the board is filled
 
    biggestBox = max(filledSubBox, key=len)
    indexBiggestBox = filledSubBox.index(biggestBox)
@@ -282,44 +334,112 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
       indexBiggestBox = filledSubBox.index(tempBiggestBox) #set index of box in original list of boxes to send to solver
 
       biggestBox = tempBiggestBox #change biggest col if needed
+   """
 
-   print("\n Minus Rows After While Loops: \n")
+   print("\n Minus Rows After While and Skip Loops: \n")
    pprint.pprint(boardMinusFilledRows)
-   print("\n Minus Column After While Loops: \n")
+   print("\n Minus Column After While and Skip Loops: \n")
    pprint.pprint(boardMinusFilledCols)
-   print("\n Minus Boxes After While Loops: \n")
-   pprint.pprint(boardMinusFilledBoxes)
 
+   """
+   print("\n Minus Boxes After While and Skip Loops: \n")
+   pprint.pprint(boardMinusFilledBoxes)
+   """
 
    #print(f"Biggest Row: {indexBiggestRow}, with length of {len(biggestRow)}, Biggest Column: {indexBiggestCol}, with length of {len(biggestCol)}, Biggest Box: {indexBiggestBox}, with length of {len(biggestBox)}")
    #and len(biggestRow) >= len(biggestBox)
    #and len(biggestCol) >= len(biggestBox)
    #get biggest val of the three, then get the coordinate of it to determine where to start changing values in sudokuSolve()
    if (len(biggestRow) >= len(biggestCol)): #================================================================ BIGGEST ROW
-      print(f"\n Start with Row {indexBiggestRow}, since it is the biggest or equal to biggest list, with a value of {len(biggestRow)}.")
 
-      #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
-      remainingVals = [item for item in possible_vals if item not in filledRowsBoard[indexBiggestRow]]
-      print(f" Row Contains: {filledRowsBoard[indexBiggestRow]}\n Remaining Values: {remainingVals}\n")
+      if (len(biggestRow) != 0): #if biggest row is NOT an empty list, then find all the possible vals needed to fill it and send it to be solved
+         print(f"\n Start with Row {indexBiggestRow}, since it is the biggest or equal to biggest list, with a value of {len(biggestRow)}.")
 
-      allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the row
+         #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
+         remainingVals = [item for item in possible_vals if item not in filledRowsBoard[indexBiggestRow]]
+         print(f" Row Contains: {filledRowsBoard[indexBiggestRow]}\n Remaining Values: {remainingVals}\n")
 
-      sudokuSolveRow(board, indexBiggestRow, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+         allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the row
 
-      print("\n Row: ",indexBiggestRow, " was attemped...Returning to main func.")
+         sudokuSolveRow(board, indexBiggestRow, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+
+         print("\n Row: ",indexBiggestRow, " was attemped...Returning to main func.")
+         return
+
+      elif (len(biggestRow) == 0): #if biggest row IS an empty list, then we are out of rows and columns to try, since to get here and have biggestRow be empty, it means the biggestCol is also empty
+
+         print("\n Hey! It looks like both the rows are columns are filled or have been skipped... Need to perform final checks... Checking if the board is filled...\n Current Board:\n")
+
+         pprint.pprint(board)
+
+         emptyCells = 0 #need to count how many empty cells are found to see if board is filled or not
+
+         #NEED TO CHECK BOARD HAS NO EMPTY SPACES ONE LAST TIME
+         #Gets the list which represents each row of the board as row, r will function as index of rows inside board
+         for r, row in enumerate(board): 
+        
+            #need to get every value inside of each row as val, v is index of vals inside each row
+            for v, val in enumerate(row):
+
+               if (val == "."): #If we found a period we need to send the row that it is in to be solved...
+
+                  print(f"\n Oops! It looks like we found a period still on the board in row {r}, col {v}, sending it to be solved now...")
+
+                  emptyCells += 1 #board is still not filled! Need to fix it below
+
+                  indexEmptyRowFound = r
+
+         #IF FOUND PERIOD AFTER FORS, SEND BOARD TO BE SOLVED
+         if (emptyCells > 0):
+            #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
+            remainingVals = [item for item in possible_vals if item not in filledRowsBoard[indexEmptyRowFound]]
+            print(f"\n Row {indexEmptyRowFound} Contains: {filledRowsBoard[indexEmptyRowFound]}\n Remaining Values: {remainingVals}\n")
+
+            allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the row
+
+            sudokuSolveRow(board, indexEmptyRowFound, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+
+            print("\n Row: ",indexEmptyRowFound, " was attemped...Returning to main func.")
+
+         #IF BOARD HAS ZERO PERIODS in it, it must be filled, so perform last check!
+         elif (emptyCells == 0): 
+            print("\n Hey! It looks like the board is full... Checking if the board is valid...")
+
+            potentiallyFinalBoardIsValid = validityChecker(board) #pass board to validity checker 
+
+            if (potentiallyFinalBoardIsValid == True):
+               print("\n Hey we did it! The board has been filled and solved according to the validity checker! Congrats! Final Board:\n")
+               pprint.pprint(board)
+               print("\n Exiting the entire program...")
+               sys.exit()
+
+            elif (potentiallyFinalBoardIsValid == False):
+
+               print("Sorry! It looks like we filled the board, but it looks like the final board we have as a result isn't actually valid.\n So either the board is not actually solvable, or a mistake was made somewhere along the way...")
+               print("\n Final Board:\n")
+               pprint.pprint(board)
+               print("\n Exiting the entire program...")
+               sys.exit()
+
 
    elif (len(biggestCol) >= len(biggestRow)): #============================================================== BIGGEST COL
-      print(f"\n Start with Col {indexBiggestCol}, since it is the biggest or equal to biggest list, with a value of {len(biggestCol)}.")
 
-      #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
-      remainingVals = [item for item in possible_vals if item not in filledColsBoard[indexBiggestCol]]
-      print(f" Column Contains: {filledColsBoard[indexBiggestCol]}\n Remaining Values: {remainingVals}\n")
+      if (len(biggestCol) != 0): #if biggest col is NOT an empty list, then find all the possible vals needed to fill it and send it to be solved
+         print(f"\n Start with Col {indexBiggestCol}, since it is the biggest or equal to biggest list, with a value of {len(biggestCol)}.")
 
-      allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the column
+         #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the column's list
+         remainingVals = [item for item in possible_vals if item not in filledColsBoard[indexBiggestCol]]
+         print(f" Column Contains: {filledColsBoard[indexBiggestCol]}\n Remaining Values: {remainingVals}\n")
 
-      sudokuSolveCol(board, indexBiggestCol, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+         allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the column
 
-      print("\n Column: ",indexBiggestCol, " was attemped...Returning to main func.")
+         sudokuSolveCol(board, indexBiggestCol, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+
+         print("\n Column: ",indexBiggestCol, " was attemped...Returning to main func.")
+
+      elif (len(biggestCol) == 0): #if biggest col IS an empty list, but we should never get here since the if comparing biggestCol is bigger than biggestRow shouldn't ever come true if biggestCol = 0
+
+         print(" Hey! Something might have gone wrong, it found biggestCol to be >= biggestRow but then also found biggestCol to be an empty list, \n but the biggestRow if would be true before it gets here...")
 
 
 """
@@ -345,7 +465,7 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
    tempPossibleRow = [ ]
 
-   print("\n Starting Values at beginning of SolveRow: ",startingVals[deadEndCount], "DeadEndCount:",deadEndCount)
+   print("\n Starting Values at beginning of SolveRow: ",startingVals[deadEndCount], "DeadEndCount:",deadEndCount, "\n")
 
    for j in range(9): #look through board until first period is found
 
@@ -395,9 +515,9 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
                   elif (deadEndCount > (len(startingVals)-1) and pRowOrderCount == 0): #if we finish trying a combo before we get to the last item in the row, and we are out of combos
                      #if we have tried the last value in the last combo of values, and we have 0 possible solutions, we need to quit since we have run out of possible combinations to try
-                     print("\n Sorry! We have tried every possible combination of values on row ", bigRowIndex, ".\n This means the board is not solvable, or that we made a mistake somewhere.\n")
+                     print("\n Sorry! We have tried every possible combination of values on row ", bigRowIndex, ".\n This means the board is not solvable, or that we made a mistake somewhere...\n")
                      print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
-
+                     print("\n Exiting Function...")
                      return possibleRowOrder #exit function without calling solveRow again, since we have reached a full deadend without any solutions
 
                   elif (deadEndCount > (len(startingVals)-1) and pRowOrderCount > 0): #if we finish trying a combo before we get to the last item in the row, and we are out of combos (j < 8)
@@ -446,10 +566,13 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
 
             pRowOrderCount += 1 
             #after adding the UNIQUE completed row order to the list, we need to increment this so next time a possible order is found in the next call to this function, it can be added properly
+            print(f" Unique solution found...tempPossibleRow: {tempPossibleRow}\n PossibleRowOrder: {possibleRowOrder}\n pOrderCount: {pRowOrderCount}")
+
 
          elif tempPossibleRow in possibleRowOrder:
 
             print("\n Oh! It looks like that possible order has already been saved to the list, so we aren't saving it, moving on... ")
+            print(f" PossibleColOrder: {possibleRowOrder}\n pOrderCount: {pRowOrderCount}")
 
          board = copy.deepcopy(board_backup) #re write regular board back to starting point to try different order of numbers again
          
@@ -567,7 +690,7 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
    tempPossibleCol = [  ]
 
-   print("\n Starting Values at beginning of SolveCol:",startingVals[deadEndCount], "DeadEndCount:",deadEndCount)
+   print("\n Starting Values at beginning of SolveCol:",startingVals[deadEndCount], "DeadEndCount:",deadEndCount, "\n")
 
    for i in range(9): #look through board until first period is found
 
@@ -616,8 +739,9 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
                   elif (deadEndCount > (len(startingVals)-1) and pColOrderCount == 0): 
                   #if we have tried the last value in the last combo of values, AND NO SOLUTION FOUND, we need to quit since we have run out of possible combinations to try
-                     print("\n We have now tried every possible combination of values on column", bigColIndex, ".\n This means the board is not solvable, or that we made a mistake somewhere.\n")
+                     print("\n We have now tried every possible combination of values on column", bigColIndex, ".\n This means the board is not solvable, or that we made a mistake somewhere...\n")
                      print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
+                     print("\n Exiting Function...")
                      return possibleColOrder #exit function since we have reached a full deadend
 
                   elif (deadEndCount > (len(startingVals)-1) and pColOrderCount > 0): #if we finish trying a combo before we get to the last item in the col, and we are out of combos (i < 8)
@@ -668,6 +792,7 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
          elif tempPossibleCol in possibleColOrder:
 
             print("\n Oh! It looks like that possible order has already been saved to the list, so we aren't saving it, moving on... ")
+            print(f" PossibleColOrder: {possibleColOrder}\n pOrderCount: {pColOrderCount}")
 
 
          board = copy.deepcopy(board_backup) #re write regular board back to starting point to try different order of numbers again
@@ -1008,7 +1133,10 @@ def main():
 
    print("\n Output:") #print output of validity of board2
    print("-" * 50)
-   print("\n", validityChecker(board2)) #send board1 to validity checker func to return if it is valid or not
+   print("\n", findEasiestStart(board2, [], [], [])) #send board2 to validity checker func to return if it is valid or not
+
+   
+
 
    #=========================================================== Board 1 SOLVED ========================================
    board3 = [["5","3","4","6","7","8","9","1","2"]
@@ -1027,8 +1155,10 @@ def main():
 
    print("\n Output:") #print output of validity of board3
    print("-" * 50)
-   print("\n", validityChecker(board3)) #send board3 to validity checker func to return if it is valid or not
+   print("\n", findEasiestStart(board3, [], [], [])) #send board3 to validity checker func to return if it is valid or not
+
    """
+   
 if __name__ == "__main__":
    main()
 
