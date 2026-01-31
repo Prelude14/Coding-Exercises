@@ -1,0 +1,233 @@
+Construct Binary Tree from Preorder and Inorder Traversal
+MediumGoogleBloombergAmazonSnowflake
+Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and inorder is the inorder traversal of the same tree, construct and return the binary tree.
+
+Example 1: *****************************************************************  SEE "constructBinaryT_fromPreorderandInorderTraversalExamples" in "prompt_images" folder
+
+Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+Example 2:
+
+Input: preorder = [-1], inorder = [-1]
+Output: [-1]
+
+===========================================================================================================================================================================================================
+
+Convert Sorted Array to Binary Search Tree
+EasyAmazonGoogleMetaMicrosoft
+Given an integer array nums where the elements are sorted in ascending order, convert it to a height-balanced binary search tree.
+
+Example 1: *****************************************************************  SEE "convertSortedArraytoBinarySearchTree" in "prompt_images" folder
+
+Input: nums = [-10,-3,0,5,9]
+Output: [0,-3,9,-10,null,5]
+Explanation: [0,-10,5,null,-3,null,9] is also accepted:
+
+Example 2:
+
+Input: nums = [1,3]
+Output: [3,1]
+Explanation: [1,null,3] and [3,1] are both height-balanced BSTs.
+
+===========================================================================================================================================================================================================
+
+Flatten Binary Tree to Linked List
+MediumGoogleMicrosoftMeta
+Given the root of a binary tree, flatten the tree into a "linked list":
+
+The "linked list" should use the same TreeNode class where the right child pointer points to the next node in the list and the left child pointer is always null.
+
+The "linked list" should be in the same order as a pre-order traversal of the binary tree.
+
+Example: *****************************************************************  SEE "flattenBinaryT_toLinkedListExamples" in "prompt_images" folder
+
+===========================================================================================================================================================================================================
+
+Course Schedule
+MediumAmazonMicrosoftGoogleMetaApple
+There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
+
+For example, the pair [0, 1], indicates that to take course 0 you have to first take course 1.
+
+Return true if you can finish all courses. Otherwise, return false.
+
+Example 1:
+
+Input: numCourses = 2, prerequisites = [[1,0]]
+Output: true
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0. So it is possible.
+Example 2:
+
+Input: numCourses = 2, prerequisites = [[1,0],[0,1]]
+Output: false
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
+
+===========================================================================================================================================================================================================
+
+Climbing Stairs
+EasyUberGoogleAmazonMicrosoft
+You are climbing a staircase. It takes n steps to reach the top.
+
+Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
+
+Example 1:
+
+Input: n = 2
+Output: 2
+Explanation: There are two ways to climb to the top.
+1. 1 step + 1 step
+2. 2 steps
+
+Example 2:
+
+Input: n = 3
+Output: 3
+Explanation: There are three ways to climb to the top.
+1. 1 step + 1 step + 1 step
+2. 1 step + 2 steps
+3. 2 steps + 1 step
+
+===========================================================================================================================================================================================================
+
+Word Search II
+HardSnapchatAirbnbAppleUber
+Given an m x n "board" of characters and a list of strings "words", return all words on the board.
+
+Each word must be constructed from letters of sequentially adjacent cells, where adjacent cells are horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.
+
+Example 1: *****************************************************************  SEE "wordSearch2Examples" in "prompt_images" folder
+
+Input: board = [["o","a","a","n"],["e","t","a","e"],["i","h","k","r"],["i","f","l","v"]], words = ["oath","pea","eat","rain"]
+Output: ["eat","oath"]
+Example 2:
+
+Input: board = [["a","b"],["c","d"]], words = ["abcb"]
+Output: []
+
+===========================================================================================================================================================================================================
+
+Single Number
+EasyGoogleCiscoAmazonBloomberg
+Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.
+
+You must implement a solution with a linear runtime complexity and use only constant extra space.
+
+Example 1:
+
+Input: nums = [2,2,1]
+Output: 1
+Example 2:
+
+Input: nums = [4,1,2,1,2]
+
+Output: 4
+Example 3:
+
+Input: nums = [1]
+
+Output: 1
+
+===========================================================================================================================================================================================================
+
+Reverse Linked List
+EasyGoogleBloombergMetaMicrosoft
+Given the head of a singly linked list, reverse the list, and return the reversed list.
+
+Example 1: *****************************************************************  SEE "reverseLinkedListExamples" in "prompt_images" folder
+
+Input: head = [1,2,3,4,5]
+Output: [5,4,3,2,1]
+
+Example 2:
+
+Input: head = [1,2]
+Output: [2,1]
+
+===========================================================================================================================================================================================================
+
+Valid Sudoku
+MediumGoogleAmazonAppleUber
+Determine if a 9 x 9 Sudoku board is valid. Only the filled cells need to be validated according to the following rules:
+
+Each row must contain the digits 1-9 without repetition.
+
+Each column must contain the digits 1-9 without repetition.
+
+Each of the nine 3 x 3 sub-boxes of the grid must contain the digits 1-9 without repetition.
+
+Note:
+
+A Sudoku board (partially filled) could be valid but is not necessarily solvable.
+
+Only the filled cells need to be validated according to the mentioned rules.
+
+Example 1:
+
+Input: board = 
+[["5","3",".",".","7",".",".",".","."]
+,["6",".",".","1","9","5",".",".","."]
+,[".","9","8",".",".",".",".","6","."]
+,["8",".",".",".","6",".",".",".","3"]
+,["4",".",".","8",".","3",".",".","1"]
+,["7",".",".",".","2",".",".",".","6"]
+,[".","6",".",".",".",".","2","8","."]
+,[".",".",".","4","1","9",".",".","5"]
+,[".",".",".",".","8",".",".","7","9"]]
+Output: true
+
+Example 2:
+
+Input: board = 
+[["8","3",".",".","7",".",".",".","."]
+,["6",".",".","1","9","5",".",".","."]
+,[".","9","8",".",".",".",".","6","."]
+,["8",".",".",".","6",".",".",".","3"]
+,["4",".",".","8",".","3",".",".","1"]
+,["7",".",".",".","2",".",".",".","6"]
+,[".","6",".",".",".",".","2","8","."]
+,[".",".",".","4","1","9",".",".","5"]
+,[".",".",".",".","8",".",".","7","9"]]
+Output: false
+Explanation: Same as Example 1, except with the 5 in the top left corner being modified to 8. Since there are two 8's in the top left 3x3 sub-box, it is invalid.
+
+===========================================================================================================================================================================================================
+
+Container With Most Water
+MediumAmazonGoogleAppleFlipkart
+You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
+
+Find two lines that together with the x-axis form a container, such that the container contains the most water.
+
+Return the maximum amount of water a container can store.
+
+Notice that you may not slant the container.
+
+Example:
+
+Input: height = [1,8,6,2,5,4,8,3,7]
+Output: 49
+Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49.
+
+===========================================================================================================================================================================================================
+
+Coin Change
+MediumAmazonGooglePinterestBloomberg
+You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
+
+Return the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return -1.
+
+You may assume that you have an infinite number of each kind of coin.
+
+Example 1:
+
+Input: coins = [1,2,5], amount = 11
+Output: 3
+Explanation: 11 = 5 + 5 + 1
+Example 2:
+
+Input: coins = [2], amount = 3
+Output: -1
+
+===========================================================================================================================================================================================================

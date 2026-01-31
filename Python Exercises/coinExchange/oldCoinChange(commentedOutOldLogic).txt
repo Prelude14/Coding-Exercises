@@ -1,0 +1,138 @@
+def my_coin_change(coins: list[int], amount: int):
+   """
+   Given an int array of coins that are different amounts, and an int amount total, returns the fewest number of coins from the array that       will equal that total amount, otherwise returns -1 if that is not possible.
+   
+   ************* NOTE: coins can be used an infinite amount of times. ***************
+   
+   Dont need to explain the math after, tho it would be nice.
+   """
+   amounts_list = [float('inf')] * (amount+1) #create list of minimum coins needed to make the amount equal to the index
+   amounts_list[0] = 0 #can't make amount of 0, so set to 0
+
+   #need to calculate each minimim coins needed for each amount i
+   for i in range(1, amount+1):
+      #try every coin to figure out which is the minimum needed for amount i
+      for coin in coins:
+         #as long as coin is NOT GREATER than amount i, AND i MINUS this coin's value is NOT infinity, we can use that coin
+         if coin <= i and amounts_list[i-coin] != float('inf'):
+
+            #if using this coin, need to set minimum coins to reach amount i to minimum between the current minimum and the minimum coins to             
+            #reach the left over amount from using this coin, in otherwords amounts_list[i-coin], since we should have already calculated                 
+            #that by the time we get to i == amount 
+            amounts_list[i] = min(amounts_list[i], amounts_list[i-coin] + 1) #update the minimum coins needed for amount i
+
+   #check min_coins isn't infinity still, then we found the min coins needed to reach amount and can return it, otherwise return -1
+   if amounts_list[amount] != float('inf'):
+      return amounts_list[amount]
+   else:
+      return -1
+
+   """
+   cc_output: list[int] = [] #create empty list that will be sent to my_output once the coins needed are added to it
+   combo = 0 #empty int to be used while adding coins together
+   temp_combo: list[int] = [] #create empty list that stores min combo of coins from modulus results
+   min_combo = float('inf') #we need infinite number as a start to compare smallest combo later
+
+   
+   for x in range(1, amount+1):
+      for i in coins: #need to check through all of the coin list, if a coin is GREATER than amount, skip it
+
+         #if we find a coin in list that is equal to total amount needed, return 1 and display which coin is equal.
+         if i == amount: 
+            print("Output: 1", ) #output is guaranteed to be 1 since we found a coin that equals the total amount
+            print("Explanation: ", amount, "= ", i) #print the string version of the addition done to reach the total needed
+            break
+
+         #if we find coin thats less than amount, need to see if it can be used to make up the amount with other coins
+         elif i < amount:
+            #check if i divided by amount is a whole number, if so, we can use that coin to make up the amount
+            if amount % i == 0:
+               coins_min = amount/i #find out how many of that coin fits into overal amount for minimum combo
+
+               if coins_min < min_combo:
+                  min_combo = coins_min #update min_combo each time we find a smaller min
+                  temp_combo.clear() #clear list each time a smalller min is found
+
+                  for j in range(0,int(min_combo)):
+                     temp_combo.append(i) #add coin that divides evenly to list as many times as it fits
+
+               #if coin_min is NOT SMALLER OR EQUAL TO min_combo, do nothing since we don't care about this coin
+
+            #if amount % i != 0:
+
+
+            combo += i #add coin to combo int
+
+            #check if new combo is equal to amount ***************************************************************************
+            #if GREATER, remove coin from combo and move on to next coin
+            if combo > amount:
+               combo -= i #remove coin from combo
+
+               #if EQUAL, add coin to list and send to output
+            elif combo == amount:
+               cc_output.append(i) #add i to list
+               my_output(cc_output)
+               break #stop loop since we found a combo
+
+            #if LESS, add coin to list and move on to next coin
+            elif combo < amount:
+               cc_output.append(i) #add i to list
+
+      #don't do anything if coin is greater than amount ************* END OF FIRST FOR LOOP *************
+
+      #after FIRST for loop runs through all coins, if no combo was found, return -1
+      print("Output: -1")
+   
+
+"""
+
+def my_output(comboNeeded: list[int]):
+   """
+   Given a list of coins that are needed from my_coin_change after it computes the fewest number of coins to make a total amount from a          different list of coins, this will calculate the number of coinis needed by counting this list, as well as add up the coins in the list to    use as the explantion of the math.
+   """
+   """
+   explanation = "" #create empty string that will be used to display the math
+
+   for index, item in enumerate(comboNeeded): #need indexes to check for first coin in list
+      if index == 0: #if its the first coin in the list, just add it to the string by itself
+         explanation += str(item)
+      else:
+         explanation += " + " + str(item) #add each coin to the string with a + sign BEFORE it
+     
+   print("Output: ", len(comboNeeded)) #we know the amount of coins needed by counting each item in the list
+   print("Explanation: ", sum(comboNeeded), "= ", explanation) #print the string version of the addition done to reach the total needed
+
+   """
+
+def main():
+  print("=" * 50)
+  print("COIN CHANGE EXERCISE")
+  print("=" * 50)
+
+  coins = [1, 2, 5]
+  amounts = [11, 15, 23, 30, 63]
+
+  print(f"\nAvailable coins: {coins}")
+  print("-" * 50)
+
+  print("\n1. MINIMUM COINS NEEDED:")
+  print("-" * 30)
+  for amount in amounts:
+      result = my_coin_change(coins, amount)
+      print(f"   Amount ${amount:3d}: {result} coins")
+
+  second_coins = [2]
+  second_amounts = [3, 15, 23, 30, 63]
+
+  print(f"\nAvailable coins: {second_coins}")
+  print("-" * 50)
+
+  print("\n1. MINIMUM COINS NEEDED:")
+  print("-" * 30)
+  for second_amount in second_amounts:
+    second_result = my_coin_change(second_coins, second_amount)
+    print(f"   Amount ${second_amount:3d}: {second_result} coins")
+
+
+if __name__ == "__main__":
+  main()

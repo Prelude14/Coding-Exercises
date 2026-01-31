@@ -1,0 +1,51 @@
+def my_max_area_calc(heights: list[int]):
+  sidel = 0 #need to track both sides of containers
+  sider = 0
+  c_width = 0 #need to tack width bewteen two sides
+  temp_area = 0
+  max_area = 0
+   
+  #Check every line in heights once, gets whatever value (height) at height[index]
+  for index, height in enumerate(heights): 
+   	  
+    sidel = height #set left side to equal line that is being checked
+      
+    for i in range(index+1, len(heights)): #need to now check every other line in the array
+        #make sure only other lines left in array are checked (nothing before and isn't current line)
+        sider = heights[i] #will asign sideR to every line in heights after the current line
+          
+        #need to find width of container (distance between the two lines in the array)
+        #for i in len(height): #i = 0-8 in the examples case, since there are 9 ints inside height
+        c_width = i-index #should always be equal to or more than 1
+        print("sidel: ", sidel, "sider: ", sider, "width: ", c_width)
+          
+        #need to check for slant rule, since we can only use the smallest side to find the area
+        if sidel <= sider: #if left side is smaller or equal to right side, use the smaller side
+            if max_area < sidel*c_width:
+                max_area = sidel*c_width 
+                print("current max_area: ", max_area)
+              
+        elif sidel > sider: #if right side is smaller than left side, use the smaller side
+            if max_area < sider*c_width:
+                max_area = sider*c_width
+                print("current max_area: ", max_area)
+          
+  return max_area
+   
+      
+def main():
+    print("=" * 50)
+    print("Most Water Container EXERCISE")
+    print("=" * 50)
+
+    heights = [1, 8, 6, 2, 5, 4, 8, 3]
+
+    print(f"\nInput array of heights: {heights}")
+    print("-" * 50)
+
+    print("\nOutput max area of water:")
+    print("-" * 30)
+    print(my_max_area_calc(heights))
+
+if __name__ == "__main__":
+    main()
