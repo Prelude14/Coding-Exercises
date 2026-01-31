@@ -21,12 +21,24 @@
 #the size of the original array, i.e. no nested loops (= O(n^2) != O(n)), and no new list to store vals from the original list, we can only use variables with O(1) space like ints or bools...
 
 def findSingleNum(nums: list[int]):
+
+   result = nums[0] #need to assign result to equal first val in list before the for loop runs, in order to compare it to every other value
    
-   for index, val in enumerate(nums):
+   #so we are going to use a bitwise XOR (or Exclusive Or, using "^") in order to find out if the current value is a duplicate or not. It is going to compare the bits of two ints, and return
+   #a NEW BINARY number made up of xor-ing each bit in each integer (5^3 == 101^011 in Binary, 1^0=1, 0^1=1, 1^1=0, so it returns the binary 110, which is equal to int 6)
+   #if 2 bits are equal it returns 0 in that place, and if they are different, it returns a 1 in that place
 
-      
-      
+   print(f" First result value (nums[0]): {result} ")
 
+   for i in range(1,len(nums)): #need to check every value in nums starting with second since result starts as the first val
+
+      print(f"\n Result before XOR: {result}, Nums[{i}]: {nums[i]}")
+      print(f"\n Result Binary before: {bin(result)}, Nums[{i}] Binary: {bin(nums[i])}")
+      result ^= nums[i] #result is equal to the previous result XOR-ed against current val at num[i], when new int is found, its binary is essentially added to result, and when duplicate is found
+      #its binary is subtracted, so when for loop ends we are left with the binary of the int that was never subtracted, giving us the int in nums that only appears once. 
+      print(f"\n Result after XOR: {result}, Result Binary after: {bin(result)}, =========================================End of each FOR loop")
+      
+   return result
 
 def main():
    print("=" * 50)
@@ -40,12 +52,11 @@ def main():
    print(nums1)
    print("-" * 50)
 
-   print("\n Output:") 
+   print("\n Output 1:") 
    print("-" * 50)
-   print("\n", findSingleNum(nums1)) 
+   print("\n Single Num1: ", findSingleNum(nums1)) 
+   print("=" * 50)
 
-
-   """
    #=========================================================== NUMS 2 ========================================
    nums2 = [4,1,2,1,2]
 
@@ -53,9 +64,10 @@ def main():
    print(nums2)
    print("-" * 50)
 
-   print("\n Output:") 
+   print("\n Output 2:") 
    print("-" * 50)
-   print("\n", findSingleNum(nums2)) 
+   print("\n Single Num2: ", findSingleNum(nums2)) 
+   print("=" * 50)
 
    #=========================================================== NUMS 3 ========================================
    nums3 = [1]
@@ -64,9 +76,11 @@ def main():
    print(nums3)
    print("-" * 50)
 
-   print("\n Output:") 
+   print("\n Output 3:") 
    print("-" * 50)
-   print("\n", findSingleNum(nums3)) 
-   """
+   print("\n Single Num3: ", findSingleNum(nums3)) 
+   print("=" * 50)
+
+
 if __name__ == "__main__":
    main()
