@@ -65,7 +65,7 @@ def findTargetNum(matrix: list[list[int]], target: int) -> bool:
 
             print("\n This is the last searchable array inside the matrix, so this means that the current firstVal is the smallest value")
             print(" inside the matrix, which further means that because the target is smaller than this val, the target cannot exist")
-            print(" inside the matrix. \n\n Returning false...")
+            print(" inside the matrix. \n\n Returning False...")
                
             return False #breaks out of while loop and entire function to prevent 2nd while loop from running as well
 
