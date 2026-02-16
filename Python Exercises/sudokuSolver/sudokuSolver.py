@@ -238,7 +238,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       elif (len(tempBiggestRow) == 0): #if the biggest row is empty BEFORE SKIPS, it means we are out of rows to fill, they must all be filled at this point, since boardMinusRows will only contain the real values in each row or an empty list for each filled row
 
-         print(f"\n While checking for the biggest row that isn't filled before it skips any rows, it found an empty list to be the biggestRow, so it should mean that \n every row has been filled by this point, since it hasn't been told which rows to skip yet, its only empting every filled row...")
+         print(f"\n While checking for the biggest row that isn't filled before it skips any rows, it found\n an empty list to be the biggestRow, so it should mean that every row has been filled by this point, since it hasn't\n been told which rows to skip yet, its only empting every filled row...")
 
          rowsFilled = True #trigger bool to be evaluated below
 
@@ -261,7 +261,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       elif (len(tempBiggestRow) == 0): #if the biggest row is empty AFTER SKIPS, it means we are out of rows to fill, either they are filled or have been skipped at this point
 
-         print(f"\n While checking for the biggest row that isn't filled after skipping certain rows, it found an empty list to be the biggestRow, so either the board \n is complete or every row has been either filled or skipped due to multiple solutions existing when they were evaluated...")
+         print(f"\n While checking for the biggest row that isn't filled after skipping certain rows, it found\n an empty list to be the biggestRow, so either the board is complete or every row has been either filled or skipped\n due to multiple solutions existing when they were evaluated...")
 
          indexBiggestRow = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
          biggestRow = tempBiggestRow #force biggest row to stay empty since we want the logic to check the column and box list for a bigger list to be sure that the board is full
@@ -288,7 +288,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
          # if the biggest col is empty BEFORE SKIPS, it means we are out of cols to fill, they must all be filled at this point, since boardMinusCols will only contain
          # the real values in each col or an empty list for each filled col
 
-         print(f"\n While checking for the biggest col that isn't filled before it skips any cols, it found an empty list to be the biggestCol, so it should mean that \n every col has been filled by this point, since it hasn't been told which cols to skip yet, its only empting every filled col...")
+         print(f"\n While checking for the biggest col that isn't filled before it skips any cols, it found\n an empty list to be the biggestCol, so it should mean that every col has been filled by this point, since it hasn't\n been told which cols to skip yet, its only empting every filled col...")
 
          indexBiggestCol = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
          biggestCol = tempBiggestCol #force biggest col to stay empty since we want the logic to check the row and box list for a bigger list to be sure that the board is full
@@ -311,7 +311,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
          # if the biggest col is empty AFTER SKIPS, it means we are out of cols to fill, they must all be filled at this point, since boardMinusCols will only contain
          # the real values in each col or an empty list for each filled col
 
-         print(f"\n While checking for the biggest col that isn't filled after skipping certain cols, it found an empty list to be the biggestCol, \n so either the board is complete or every col has been either filled or skipped due to multiple solutions existing when they were evaluated...")
+         print(f"\n While checking for the biggest col that isn't filled after skipping certain cols, it found\n an empty list to be the biggestCol, so either the board is complete or every col has been either filled or skipped due\n to multiple solutions existing when they were evaluated...")
 
          indexBiggestCol = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
          biggestCol = tempBiggestCol #force biggest col to stay empty since we want the logic to check the row and box list for a bigger list to be sure that the board is full
@@ -368,7 +368,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       elif (len(biggestRow) == 0): #if biggest row IS an empty list, then we are out of rows and columns to try, since to get here and have biggestRow be empty, it means the biggestCol is also empty
 
-         print("\n Hey! It looks like both the rows are columns are filled or have been skipped... Need to perform final checks... Checking if the board is filled...\n Current Board:\n")
+         print("\n Hey! It looks like both the rows are columns are filled or have been skipped...\n Need to perform final checks... Checking if the board is filled...\n Current Board:\n")
 
          pprint.pprint(board)
 
@@ -1103,26 +1103,36 @@ def main():
             ,[".","6",".",".",".",".","2","8","."]
             ,[".",".",".","4","1","9",".",".","5"]
             ,[".",".",".",".","8",".",".","7","9"]]
+
+      boardHMCOMPLETED = [["5","4","3","9","8","6","1","2","7"]
+                         ,["9","7","2","1","3","5","4","8","6"]
+                         ,["6","1","8","2","7","4","3","5","9"]
+                         ,["7","5","1","6","2","8","9","4","3"]
+                         ,["8","3","4","7","9","1","2","6","5"]
+                         ,["2","6","9","5","4","3","7","1","8"]
+                         ,["4","9","6","8","1","7","5","3","2"]
+                         ,["3","2","5","4","6","9","8","7","1"]
+                         ,["1","8","7","3","5","2","6","9","4"]]
    """
 
-   board1 = [["5","4",".","9","8","6","1","2","."]
-            ,["9",".",".",".","3",".",".",".","."]
-            ,[".",".",".","2","7",".","3",".","."]
-            ,[".",".","1","6","2",".",".",".","."]
-            ,["8","3","4","7","9","1","2","6","5"]
-            ,[".",".","9",".","4","3","7",".","."]
-            ,[".",".","6",".","1","7",".",".","."]
-            ,[".",".","5",".","6",".",".",".","1"]
-            ,[".",".",".",".","5",".",".","9","4"]]
+   boardHARDMODE = [["5","4",".","9","8","6","1","2","7"]
+                   ,["9",".","2",".","3",".",".",".","."]
+                   ,[".",".",".","2",".",".","3",".","."]
+                   ,[".",".","1","6","2",".",".",".","."]
+                   ,["8","3","4","7","9",".","2",".","5"]
+                   ,[".",".","9",".","4","3","7",".","."]
+                   ,[".",".","6",".",".","7",".",".","."]
+                   ,[".",".","5",".","6",".",".",".","1"]
+                   ,["1",".",".",".","5","2",".","9","4"]]
 
    print("\n Input board 1: ") #print board1 to console,
-   pprint.pprint(board1)
+   pprint.pprint(boardHARDMODE)
    print("-" * 50)
 
    print("\n Output:") #print output of validity of board1
    print("-" * 50)
    #print("\n", sudokuSolve(board1))
-   print("\n", findEasiestStart(board1, [], [], []))
+   print("\n", findEasiestStart(boardHARDMODE, [], [], []))
    #print("\n", validityChecker(board1)) #send board1 to validity checker func to return if it is valid or not
 
 
