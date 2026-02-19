@@ -108,7 +108,29 @@ Output: []
 
 ===========================================================================================================================================================================================================
 
-Single Number
+Search a 2D Matrix:																			SEE "search2DMatrix.py", DONE
+
+   You are given an m x n integer matrix called matrix with the following two properties:
+
+   - Each row is sorted in non-decreasing order.
+
+   - The first integer of each row is greater than the last integer of the previous row.
+
+   Given an integer target, return true if target is in matrix or false otherwise.
+
+   You must write a solution in O(log(m * n)) time complexity.
+
+   Example 1: See picture in " prompt_images/search2DMatrixExamples "
+   Input: matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+   Output: true
+
+   Example 2: See picture in " prompt_images/search2DMatrixExamples "
+   Input: matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 13
+   Output: false
+
+===========================================================================================================================================================================================================
+
+Single Number																				SEE "singleNumEX.py", DONE
 EasyGoogleCiscoAmazonBloomberg
 Given a non-empty array of integers nums, every element appears twice except for one. Find that single one.
 
@@ -147,7 +169,7 @@ Output: [2,1]
 
 ===========================================================================================================================================================================================================
 
-Valid Sudoku
+Valid Sudoku																				SEE "sudokuEX.py", DONE
 MediumGoogleAmazonAppleUber
 Determine if a 9 x 9 Sudoku board is valid. Only the filled cells need to be validated according to the following rules:
 
@@ -194,7 +216,7 @@ Explanation: Same as Example 1, except with the 5 in the top left corner being m
 
 ===========================================================================================================================================================================================================
 
-Container With Most Water
+Container With Most Water																		SEE "my_max_area_calc.txt", DONE
 MediumAmazonGoogleAppleFlipkart
 You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
 
@@ -212,7 +234,7 @@ Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,
 
 ===========================================================================================================================================================================================================
 
-Coin Change
+Coin Change																				SEE "coinChange.py", DONE
 MediumAmazonGooglePinterestBloomberg
 You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money.
 

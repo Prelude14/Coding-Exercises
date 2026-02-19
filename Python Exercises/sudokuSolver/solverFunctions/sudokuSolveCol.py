@@ -63,16 +63,19 @@ import sudokuSolveRow
 
 import sudokuSolveBox
 
+import sudokuResetSkips
+
 
 """Function to attempt solving partially completed sudoku board, given list of 9 other lists of 9 ints or ".", as well as the index of the row with the most filled cells in the board already"""
-def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skipRows, skipCols, skipBoxes) -> []:
+def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skippedVals) -> []:
 
    temp_col_board = copy.deepcopy(board) #create copy of board in order to edit cells in only if they work
    board_backup = copy.deepcopy(board) #create copy of board in order to go back to if deadend is reached
 
    tempPossibleCol = [  ]
-
-   print("\n Starting Values at beginning of SolveCol:",startingVals[deadEndCount], "DeadEndCount:",deadEndCount, "\n")
+   newSkippedVals = [] #makes sure each solver function starts with empty list before skips are reset
+   
+   print("\n Starting Values at beginning of SolveCol:",startingVals[deadEndCount],", Possible Permutations:",len(startingVals),", DeadEndCount:",deadEndCount, "\n")
 
    for i in range(9): #look through board until first period is found
 
@@ -115,7 +118,7 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
                      print(" DeadEndCount Now Equals = ", deadEndCount, "\n StartingVals Length: ", len(startingVals) )
 
-                     sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skipRows, skipCols, skipBoxes) #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
+                     sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skippedVals) #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
 
                      return possibleColOrder #exit for loop so that it doesn't try any more values after dead end is reached
 
@@ -185,7 +188,7 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
          if (deadEndCount != len(startingVals) ):
             print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveCol recursively...")
-            allOrders = sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skipRows, skipCols, skipBoxes) 
+            allOrders = sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skippedVals) 
 
             print("\n After saving possible col order",pColOrderCount,"we have checked the rest of the startingvals and finished with ", len(allOrders), "possible orders...")
 
@@ -199,12 +202,12 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
                print(f"\n So column {bigColIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
 
-               skipCols.append(bigColIndex) #add this row to list of rows for easiestStart func to skip when choosing starting position
+               skippedVals[1].append(bigColIndex) #add this row to list of rows for easiestStart func to skip when choosing starting position
 
                temp_col_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different row, col, or box
                board = copy.deepcopy(board_backup)
 
-               findEasiestStart.findEasiestStart(board, skipRows, skipCols, skipBoxes)
+               findEasiestStart.findEasiestStart(board, skippedVals)
 
             elif (pColOrderCount == 1):
                #if column only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
@@ -213,10 +216,11 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
                   board[y][bigColIndex] = possibleColOrder[0][y] #re save only solution to board before sending the board with the completed col to next start
 
 
-               print(f"\n Column completed with only possible combination! Sending board to next starting point...\n New Board Being Sent: \n")
+               print(f"\n Column completed with only possible combination! Sending board to next starting point...\n Clearing Skipped Vals...\n New Board Being Sent: \n")
                pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+               newSkippedVals = copy.deepcopy(sudokuResetSkips.sudokuResetSkips() ) #gets new list containing 3 empty lists
 
-               findEasiestStart.findEasiestStart(board, skipRows, skipCols, skipBoxes)
+               findEasiestStart.findEasiestStart(board, newSkippedVals)
 
       #if we have tried all possible orders of starting vals, then we should have every possible order in the possibleColOrder list, 
       elif (board[i][bigColIndex] != "." and i == 8 and deadEndCount == len(startingVals) ):
@@ -227,12 +231,12 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
             print(f"\n So column: {bigColIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go and try another row, column, or box...")
 
-            skipCols.append(bigColIndex) #add this row to list of rows for easiestStart func to skip when choosing starting position
+            skippedVals[1].append(bigColIndex) #add this row to list of rows for easiestStart func to skip when choosing starting position
 
             temp_col_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different row, col, or box
             board = copy.deepcopy(board_backup)
 
-            findEasiestStart.findEasiestStart(board, skipRows, skipCols, skipBoxes)
+            findEasiestStart.findEasiestStart(board, skippedVals)
 
          elif (len(possibleColOrder) == 1):
             #if column only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
@@ -240,10 +244,11 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
                board[z][bigColIndex] = possibleColOrder[0][z] #re save only solution to board before sending the board with the completed col to next start
 
-            print(f"\n Column completed with only possible combination! Sending board to next starting point...\n New Board Being Sent: \n")
+            print(f"\n Column completed with only possible combination! Sending board to next starting point...\n Clearing Skipped Vals...\n New Board Being Sent: \n")
             pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+            newSkippedVals = copy.deepcopy(sudokuResetSkips.sudokuResetSkips() ) #gets new list containing 3 empty lists
 
-            findEasiestStart.findEasiestStart(board, skipRows, skipCols, skipBoxes)
+            findEasiestStart.findEasiestStart(board, newSkippedVals)
 
       #if we have tried all possible orders of starting vals, then we should have every possible order in the possibleRowOrder list, AND THE DEADENDCOUNT IS MAXXED BEFORE FINISHING ROW
       elif (deadEnd == True and i <= 8 and deadEndCount == len(startingVals) ):
@@ -254,12 +259,12 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
             print(f"\n So Col: {bigColIndex} has more than 1 possible combination, so we shouldn't fill it, and instead we should go\n and try another row, column, or box...")
 
-            skipCols.append(bigColIndex) #add this Col to list of Cols for easiestStart func to skip when choosing starting position
+            skippedVals[1].append(bigColIndex) #add this Col to list of Cols for easiestStart func to skip when choosing starting position
 
             temp_col_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different row, col, or box
             board = copy.deepcopy(board_backup)
 
-            findEasiestStart.findEasiestStart(board, skipRows, skipCols, skipBoxes)
+            findEasiestStart.findEasiestStart(board, skippedVals)
 
          elif (pColOrderCount == 1):
 
@@ -268,10 +273,11 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
 
                board[q][bigColIndex] = possibleColOrder[0][q] #re save only solution to board before sending the board with the completed Col to next start
 
-            print(f"\n Col completed with only possible combination after checking every single combo! Sending board to next starting point...\n New Board Being Sent: \n")
+            print(f"\n Col completed with only possible combination after checking every single combo! Sending board to next starting point...\n Clearing Skipped Vals...\n New Board Being Sent: \n")
             pprint.pprint(board) #for debugging board after sudokuSolve is finished checking every cell.
+            newSkippedVals = copy.deepcopy(sudokuResetSkips.sudokuResetSkips() ) #gets new list containing 3 empty lists
 
-            findEasiestStart.findEasiestStart(board, skipRows, skipCols, skipBoxes)
+            findEasiestStart.findEasiestStart(board, newSkippedVals)
 
          elif (pColOrderCount < 1):
 

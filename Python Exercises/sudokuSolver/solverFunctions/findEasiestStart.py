@@ -63,10 +63,12 @@ import sudokuSolveCol
 
 import sudokuSolveBox
 
+import sudokuResetSkips
+
 
 
 """Function to attempt finding the best empty cell to start from, starting with row or col with least amount of numbers, then sub-box if desparate? """
-def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
+def findEasiestStart(board: list[list[str]], skippedVals: list[list[int]]):
 
    possible_vals = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] #need list of values to try in the empty cells later (to be sent to solver funcs later)
 
@@ -88,6 +90,10 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
    boxesFilled = False
 
    potentiallyFinalBoardIsValid = None #none because it is deteremined by the validityChecker function
+
+   skipRows = copy.deepcopy(skippedVals[0]) #save current skip rows from first list inside skippedVals list to check for rows to skip
+   skipCols = copy.deepcopy(skippedVals[1]) #save current skip cols from first list inside skippedVals list to check for cols to skip
+   skipBoxes = copy.deepcopy(skippedVals[2]) #save current skip boxess from first list inside skippedVals list to check for boxes to skip
 
    #Gets the list which represents each row of the board as row, i will function as index of rows inside board
    for i, row in enumerate(board): 
@@ -222,7 +228,9 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
    """
    # Had the logic to check boxes just like the row and col for a starting point, but commented out once I had changed the rows and cols code to work durastically different, 
    # now is not needed, and is casuing index issues once the board is filled
-
+   """
+   #once all the lists are filled, we need to count the lengths and get the list with the highest amount of values filled in to use as our starting point
+   #WE WANT ONLY LISTS THAT ARE NOT FILLED, so limit max to be less than 9
    biggestBox = max(filledSubBox, key=len)
    indexBiggestBox = filledSubBox.index(biggestBox)
 
@@ -234,26 +242,58 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
       #filledSubBox.insert(indexBiggestBox, removedBox) #re-insert previous col so that the indexes match up
 
-      indexBiggestBox = filledSubBox.index(tempBiggestBox) #set index of box in original list of boxes to send to solver
+      if (len(tempBiggestBox) != 0): #as long as the biggest box is not empty BEFORE SKIPS, if it is, the board is complete or we are out of boxes to try
 
-      biggestBox = tempBiggestBox #change biggest col if needed
-   """
+         indexBiggestBox = filledSubBox.index(tempBiggestBox) #set index of box in original list of boxes to send to solver
+
+         biggestBox = tempBiggestBox #change biggest box if needed
+
+      elif (len(tempBiggestRow) == 0): #if the biggest row is empty BEFORE SKIPS, it means we are out of rows to fill, they must all be filled at this point, since boardMinusRows will only contain the real values in each row or an empty list for each filled row
+
+         print(f"\n While checking for the biggest box that isn't filled before it skips any boxess, it found\n an empty list to be the biggestBox, so it should mean that every box has been filled by this point, since it hasn't\n been told which boxes to skip yet, its only emptied every filled box...")
+
+         boxesFilled = True #trigger bool to be evaluated below
+
+         indexBiggestBox = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
+         biggestBox = tempBiggestBox #force biggest box to stay empty since we want the logic to check the row and column list for a bigger list to be sure that the board is full
+
+   #if we found more than one option for a box, we want to skip those Boxes and find the biggest value again
+   if (len(skipBoxes) > 0):
+
+      for x in skipBoxes:
+         boardMinusFilledBoxes[x] = [] #remove skip boxes from board being checked for biggest box
+
+      tempBiggestBox = max(boardMinusFilledBoxes, key=len) #get new biggest in line from list without the skipped boxes
+
+      if (len(tempBiggestBox) != 0): #as long as the biggest box is not empty AFTER SKIPS, if it is, the board is complete or we are out of boxes to try
+
+         indexBiggestBox = filledSubBox.index(tempBiggestBox) #set index of box in original list of boxes to send to solver
+
+         biggestBox = tempBiggestBox #change biggest box if needed
+
+      elif (len(tempBiggestBox) == 0): 
+         # if the biggest box is empty AFTER SKIPS, it means we are out of boxes to fill, they must all be filled at this point, since boardMinusBoxes will only contain
+         # the real values in each box or an empty list for each filled box
+
+         print(f"\n While checking for the biggest box that isn't filled after skipping certain boxes, it found\n an empty list to be the biggestBox, so either the board is complete or every box has been either filled or skipped due\n to multiple solutions existing when they were evaluated...")
+
+         indexBiggestBox = 0 #force biggest index to be 0 since we dont want to compare the real values on the board anymore
+         biggestBox = tempBiggestBox #force biggest box to stay empty since we want the logic to check the row and column list for a bigger list to be sure that the board is full
+
 
    print("\n Minus Rows After While and Skip Loops: \n")
    pprint.pprint(boardMinusFilledRows)
    print("\n Minus Column After While and Skip Loops: \n")
    pprint.pprint(boardMinusFilledCols)
-
-   """
    print("\n Minus Boxes After While and Skip Loops: \n")
    pprint.pprint(boardMinusFilledBoxes)
-   """
+   
 
    #print(f"Biggest Row: {indexBiggestRow}, with length of {len(biggestRow)}, Biggest Column: {indexBiggestCol}, with length of {len(biggestCol)}, Biggest Box: {indexBiggestBox}, with length of {len(biggestBox)}")
    #and len(biggestRow) >= len(biggestBox)
    #and len(biggestCol) >= len(biggestBox)
    #get biggest val of the three, then get the coordinate of it to determine where to start changing values in sudokuSolve()
-   if (len(biggestRow) >= len(biggestCol)): #================================================================ BIGGEST ROW
+   if (len(biggestRow) >= len(biggestCol) and len(biggestRow) >= len(biggestBox)): #================================================================ BIGGEST ROW
 
       if (len(biggestRow) != 0): #if biggest row is NOT an empty list, then find all the possible vals needed to fill it and send it to be solved
          print(f"\n Start with Row {indexBiggestRow}, since it is the biggest or equal to biggest list, with a value of {len(biggestRow)}.")
@@ -264,7 +304,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
          allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the row
 
-         sudokuSolveRow.sudokuSolveRow(board, indexBiggestRow, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+         sudokuSolveRow.sudokuSolveRow(board, indexBiggestRow, allPossibleVals, 0, [ ], 0, skippedVals)
 
          print("\n Row: ",indexBiggestRow, " was attemped...Returning to main func.")
          return
@@ -300,7 +340,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
             allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the row
 
-            sudokuSolveRow.sudokuSolveRow(board, indexEmptyRowFound, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+            sudokuSolveRow.sudokuSolveRow(board, indexEmptyRowFound, allPossibleVals, 0, [ ], 0, skippedVals)
 
             print("\n Row: ",indexEmptyRowFound, " was attemped...Returning to main func.")
 
@@ -325,7 +365,7 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
                sys.exit()
 
 
-   elif (len(biggestCol) >= len(biggestRow)): #============================================================== BIGGEST COL
+   elif (len(biggestCol) >= len(biggestRow) and len(biggestCol) >= len(biggestBox)): #============================================================== BIGGEST COL
 
       if (len(biggestCol) != 0): #if biggest col is NOT an empty list, then find all the possible vals needed to fill it and send it to be solved
          print(f"\n Start with Col {indexBiggestCol}, since it is the biggest or equal to biggest list, with a value of {len(biggestCol)}.")
@@ -336,15 +376,33 @@ def findEasiestStart(board: list[list[str]], skipRows, skipCols, skipBoxes):
 
          allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the column
 
-         sudokuSolveCol.sudokuSolveCol(board, indexBiggestCol, allPossibleVals, 0, [ ], 0, skipRows, skipCols, skipBoxes)
+         sudokuSolveCol.sudokuSolveCol(board, indexBiggestCol, allPossibleVals, 0, [ ], 0, skippedVals)
 
          print("\n Column: ",indexBiggestCol, " was attemped...Returning to main func.")
 
       elif (len(biggestCol) == 0): #if biggest col IS an empty list, but we should never get here since the if comparing biggestCol is bigger than biggestRow shouldn't ever come true if biggestCol = 0
 
-         print(" Hey! Something might have gone wrong, it found biggestCol to be >= biggestRow but then also found biggestCol to be an empty list, \n but the biggestRow if would be true before it gets here...")
+         print(" Hey! Something might have gone wrong, it found biggestCol to be >= biggestRow and >= biggestCol, but then also found\n biggestCol to be an empty list, but the biggestRow if would be true before it gets here...")
 
 
+   elif (len(biggestBox) >= len(biggestRow) and len(biggestBox) >= len(biggestCol) ): #============================================================== BIGGEST BOX
+
+      if (len(biggestBox) != 0): #if biggest Box is NOT an empty list, then find all the possible vals needed to fill it and send it to be solved
+         print(f"\n Start with Box {indexBiggestBox}, since it is the biggest or equal to biggest list, with a value of {len(biggestBox)}.")
+
+         #generate the remaining values that need to be tried, by finding the items in possible vals that aren't in the Box's list
+         remainingVals = [item for item in possible_vals if item not in filledSubBox[indexBiggestBox]]
+         print(f" Box Contains: {filledSubBox[indexBiggestBox]}\n Remaining Values: {remainingVals}\n")
+
+         allPossibleVals = list(itertools.permutations(remainingVals)) #generate list of lists where each list is a different combo of the remaingvals to fill the column
+
+         sudokuSolveBox.sudokuSolveBox(board, indexBiggestBox, allPossibleVals, 0, [ ], 0, skippedVals)
+
+         print("\n Box: ",indexBiggestBox, " was attemped...Returning to main func.")
+
+      elif (len(biggestBox) == 0): #if biggest Box IS an empty list, but we should never get here since the if comparing biggestBox is bigger than biggestRow shouldn't ever come true if biggestBox = 0
+
+         print(" Hey! Something might have gone wrong, it found biggestBox to be >= biggestRow and >= biggestCol, but then also found\n biggestBox to be an empty list, but the biggestRow if would be true before it gets here...")
 """
    elif (len(biggestBox) >= len(biggestRow) and len(biggestBox) >= len(biggestCol)): #=============================================================== BIGGEST BOX
       print(f"\n Start with Box {indexBiggestBox}, since it is the biggest or equal to biggest list, with a value of {len(biggestBox)}.")
@@ -404,7 +462,7 @@ def main():
    print("\n Output:") #print output of validity of board1
    print("-" * 50)
    #print("\n", sudokuSolve(board1))
-   print("\n", findEasiestStart(boardHARDMODE, [], [], []))
+   print("\n", findEasiestStart(boardHARDMODE, [[], [], []]) )
    #print("\n", validityChecker(board1)) #send board1 to validity checker func to return if it is valid or not
 
 

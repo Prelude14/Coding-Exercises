@@ -78,7 +78,7 @@ def validityChecker(board: list[list[str]]) -> bool:
             
                if (val == row[x]):
 
-                  print(f"\n Duplicate value in ROW, at row {i} and col {j}, where val = {val}, and row[{x}]: {row[x]}" )
+                  print(f" Duplicate value in ROW, at row {i} and col {j}, where val = {val}, and row[{x}]: {row[x]}" )
 
                   return False
 
@@ -88,7 +88,7 @@ def validityChecker(board: list[list[str]]) -> bool:
             
                if (val == board[y][j]):
 
-                  print(f"\n Duplicate value in COL, at row {i} and col {j}, where val = {val}, and board[{y}][{j}]: {board[y][j]}" )
+                  print(f" Duplicate value in COL, at row {i} and col {j}, where val = {val}, and board[{y}][{j}]: {board[y][j]}" )
 
                   return False
 
@@ -157,7 +157,7 @@ def validityChecker(board: list[list[str]]) -> bool:
             
                if (item == box[p]):
 
-                  print(f"\n Duplicate value in SUB-BOX, at BOX: {m} and item: {n}, where val = {item}, and box[{n}][{p}] = {box[p]}\n" )
+                  print(f"\n Duplicate value in SUB-BOX, at BOX: {m} and item: {n}, where val = {item}, and box[{n}][{p}] = {box[p]}" )
 
                   return False
    
