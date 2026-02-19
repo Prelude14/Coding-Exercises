@@ -311,7 +311,7 @@ def findEasiestStart(board: list[list[str]], skippedVals: list[list[int]]):
 
       elif (len(biggestRow) == 0): #if biggest row IS an empty list, then we are out of rows and columns to try, since to get here and have biggestRow be empty, it means the biggestCol is also empty
 
-         print("\n Hey! It looks like both the rows are columns are filled or have been skipped...\n Need to perform final checks... Checking if the board is filled...\n Current Board:\n")
+         print("\n Hey! It looks like both the rows, columns or boxes are filled or have been skipped...\n Need to perform final checks... Checking if the board is filled...\n Current Board:\n")
 
          pprint.pprint(board)
 

@@ -186,11 +186,28 @@ def sudokuSolveCol(board: list[list[str]], bigColIndex, startingVals, deadEndCou
          #we should increment deadEndCount in order to check the next possible order of vals, otherwise it infintely checks just the first correct order
          deadEndCount += 1
 
-         if (deadEndCount != len(startingVals) ):
-            print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveCol recursively...")
-            allOrders = sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skippedVals) 
+         if (deadEndCount != len(startingVals) ):#check to see if we tried all permutations of startingVals yet
 
-            print("\n After saving possible col order",pColOrderCount,"we have checked the rest of the startingvals and finished with ", len(allOrders), "possible orders...")
+            print(f"\n So we finished checking and potentially saving a col's solution while there is still more startingVals to try,\n checking if there is now more than 1 possible solution...")
+
+            if (pColOrderCount <= 1): #if we have saved up to one unique solution so far
+               print(f"\n So there is either 0 or 1 unique possible solution curently saved... Will need to continue checking combos...")
+               print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveCol recursively...")
+               allOrders = sudokuSolveCol(board, bigColIndex, startingVals, deadEndCount, possibleColOrder, pColOrderCount, skippedVals) 
+
+               print("\n After saving possible col order",pColOrderCount,"we have checked the rest of the startingvals and finished with ", len(allOrders), "possible orders...")
+
+            elif (pColOrderCount > 1): #if we have now saved 2 unique solutions AND DEADEND NOT HIT YET, we want to skip early to avoid doing 720 permutations
+
+               print(f"\n So this col now has more than 1 unique possible solution curently saved...\n Skip this column (col {bigColIndex}) and move on...")
+               print(f"\n pColOrderCount: {pColOrderCount}, PossibleColOrder: {possibleColOrder}")
+
+               skippedVals[1].append(bigColIndex) #add index of this col to list of cols for easiestStart func to skip when choosing starting position
+
+               temp_col_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+               board = copy.deepcopy(board_backup)
+
+               findEasiestStart.findEasiestStart(board, skippedVals)
 
          elif (deadEndCount == len(startingVals) ): #if we have no more permutations to check after attempting to save the last possible order, we need to decide to fill the board or not
 

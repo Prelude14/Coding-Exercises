@@ -189,16 +189,35 @@ def sudokuSolveRow(board: list[list[str]], bigRowIndex, startingVals, deadEndCou
          #we should increment deadEndCount in order to check the next possible order of vals, otherwise it infintely checks just the first correct order
          deadEndCount += 1
 
-         if (deadEndCount != len(startingVals) ):
-            print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveRow recursively...")
-            #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
-            allOrders = sudokuSolveRow(board, bigRowIndex, startingVals, deadEndCount, possibleRowOrder, pRowOrderCount, skippedVals)
+         if (deadEndCount != len(startingVals) ): #check to see if we tried all permutations of startingVals yet
 
-            print("\n After saving possible row order",pRowOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+            print(f"\n So we finished checking and potentially saving a row's solution while there is still more startingVals to try,\n checking if there is now more than 1 possible solution...")
 
-            return allOrders #need to return the list of possible rows after 
+            if (pRowOrderCount <= 1): #if we have saved up to one unique solution so far
+               
+               print(f"\n So there is either 0 or 1 unique possible solution curently saved... Will need to continue checking combos...")
+               print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveRow recursively...")
+               #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
+               allOrders = sudokuSolveRow(board, bigRowIndex, startingVals, deadEndCount, possibleRowOrder, pRowOrderCount, skippedVals)
 
-         elif (deadEndCount == len(startingVals) ):
+               print("\n After saving possible row order",pRowOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+
+               return allOrders #need to return the list of possible rows after 
+
+            elif (pRowOrderCount > 1): #if we have now saved 2 unique solutions AND DEADEND NOT HIT YET, we want to skip early to avoid doing 720 permutations
+
+               print(f"\n So this row now has more than 1 unique possible solution curently saved...\n Skip this row (row {bigRowIndex}) and move on...")
+               print(f"\n pRowOrderCount: {pRowOrderCount}, PossibleRowOrder: {possibleRowOrder}")
+
+               skippedVals[0].append(bigRowIndex) #add index of this row to list of rows for easiestStart func to skip when choosing starting position
+
+               temp_row_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+               board = copy.deepcopy(board_backup)
+
+               findEasiestStart.findEasiestStart(board, skippedVals)
+
+
+         elif (deadEndCount == len(startingVals) ): #if we have reached end of possible permutations of startingVals
 
             print("\n So the row has finished checking every possible combination, it found", pRowOrderCount, "possible row order(s)...")
 

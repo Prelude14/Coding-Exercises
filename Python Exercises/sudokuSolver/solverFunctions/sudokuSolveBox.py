@@ -202,14 +202,31 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
                deadEndCount += 1
 
                if (deadEndCount != len(startingVals) ):
-                  print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveBox recursively...")
-                  #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
-                  allOrders = sudokuSolveBox(board, bigBoxIndex, startingVals, deadEndCount, possibleBoxOrder, pBoxOrderCount, skippedVals)
 
-                  print("\n After saving possible Box order",pBoxOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+                  print(f"\n So we finished checking and potentially saving a box's solution while there is still more startingVals to try,\n checking if there is now more than 1 possible solution...")
 
-                  return allOrders #need to return the list of possible Boxes after 
+                  if (pBoxOrderCount <= 1): #if we have saved up to one unique solution so far
+                     print(f"\n So there is either 0 or 1 unique possible solution curently saved... Will need to continue checking combos...")
+                     print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveBox recursively...")
+                     #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
+                     allOrders = sudokuSolveBox(board, bigBoxIndex, startingVals, deadEndCount, possibleBoxOrder, pBoxOrderCount, skippedVals )
 
+                     print("\n After saving possible Box order",pBoxOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+
+                     return allOrders #need to return the list of possible Boxes after 
+
+                  elif (pBoxOrderCount > 1): #if we have now saved 2 unique solutions AND DEADEND NOT HIT YET, we want to skip early to avoid doing 720 permutations
+
+                     print(f"\n So this box now has more than 1 unique possible solution curently saved...\n Skip this Box (box {bigBoxIndex}) and move on...")
+                     print(f"\n pBoxOrderCount: {pBoxOrderCount}, PossibleBoxOrder: {possibleBoxOrder}")
+
+                     skippedVals[2].append(bigBoxIndex) #add this Box to list of Boxes for easiestStart func to skip when choosing starting position
+
+                     temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+                     board = copy.deepcopy(board_backup)
+
+                     findEasiestStart.findEasiestStart(board, skippedVals )
+                     
                elif (deadEndCount == len(startingVals) ):
 
                   print("\n So the Box has finished checking every possible combination, it found", pBoxOrderCount, "possible Box order(s)...")
@@ -222,7 +239,7 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
 
                      skippedVals[2].append(bigBoxIndex) #add this Box to list of Boxes for easiestStart func to skip when choosing starting position
 
-                     temp_row_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+                     temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
                      board = copy.deepcopy(board_backup)
 
                      findEasiestStart.findEasiestStart(board, skippedVals)
@@ -468,13 +485,31 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
                deadEndCount += 1
 
                if (deadEndCount != len(startingVals) ):
-                  print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveBox recursively...")
-                  #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
-                  allOrders = sudokuSolveBox(board, bigBoxIndex, startingVals, deadEndCount, possibleBoxOrder, pBoxOrderCount, skippedVals ) 
 
-                  print("\n After saving possible Box order",pBoxOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+                  print(f"\n So we finished checking and potentially saving a box's solution while there is still more startingVals to try,\n checking if there is now more than 1 possible solution...")
 
-                  return allOrders #need to return the list of possible Boxes after 
+                  if (pBoxOrderCount <= 1): #if we have saved up to one unique solution so far
+
+                     print(f"\n So there is either 0 or 1 unique possible solution curently saved... Will need to continue checking combos...")
+                     print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveBox recursively...")
+                     #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
+                     allOrders = sudokuSolveBox(board, bigBoxIndex, startingVals, deadEndCount, possibleBoxOrder, pBoxOrderCount, skippedVals )
+
+                     print("\n After saving possible Box order",pBoxOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+
+                     return allOrders #need to return the list of possible Boxes after 
+
+                  elif (pBoxOrderCount > 1): #if we have now saved 2 unique solutions AND DEADEND NOT HIT YET, we want to skip early to avoid doing 720 permutations
+
+                     print(f"\n So this box now has more than 1 unique possible solution curently saved...\n Skip this Box (box {bigBoxIndex}) and move on...")
+                     print(f"\n pBoxOrderCount: {pBoxOrderCount}, PossibleBoxOrder: {possibleBoxOrder}")
+
+                     skippedVals[2].append(bigBoxIndex) #add this Box to list of Boxes for easiestStart func to skip when choosing starting position
+
+                     temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+                     board = copy.deepcopy(board_backup)
+
+                     findEasiestStart.findEasiestStart(board, skippedVals )
 
                elif (deadEndCount == len(startingVals) ):
 
@@ -488,7 +523,7 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
 
                      skippedVals[2].append(bigBoxIndex) #add this Box to list of Boxes for easiestStart func to skip when choosing starting position
 
-                     temp_row_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+                     temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
                      board = copy.deepcopy(board_backup)
 
                      findEasiestStart.findEasiestStart(board, skippedVals)
@@ -634,7 +669,7 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
 
                      tBoxBoardIsValid = validityChecker.validityChecker(temp_box_board) #pass temp board once so that it doesnt run every if statement below
 
-                     print(f"\n Box 2, 5, or 8, m = {m}, n= {n}, index = {index}, (len(startingVals[deadEndCount])-1) = {(len(startingVals[deadEndCount])-1)}, isValid = {tBoxBoardIsValid}")
+                     #print(f"\n Box 2, 5, or 8, m = {m}, n= {n}, index = {index}, (len(startingVals[deadEndCount])-1) = {(len(startingVals[deadEndCount])-1)}, isValid = {tBoxBoardIsValid}")
 
                      if (tBoxBoardIsValid == True):
                         #if new val works, then change actual value in the board and check next cell, should stop every cell being forced to be 9
@@ -735,13 +770,30 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
                deadEndCount += 1
 
                if (deadEndCount != len(startingVals) ):
-                  print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveBox recursively...")
-                  #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
-                  allOrders = sudokuSolveBox(board, bigBoxIndex, startingVals, deadEndCount, possibleBoxOrder, pBoxOrderCount, skippedVals )
 
-                  print("\n After saving possible Box order",pBoxOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+                  print(f"\n So we finished checking and potentially saving a box's solution while there is still more startingVals to try,\n checking if there is now more than 1 possible solution...")
 
-                  return allOrders #need to return the list of possible Boxes after 
+                  if (pBoxOrderCount <= 1): #if we have saved up to one unique solution so far
+                     print(f"\n So there is either 0 or 1 unique possible solution curently saved... Will need to continue checking combos...")
+                     print(f"\n Checking next possible combination by sending updated deadEndCount({deadEndCount}) to SolveBox recursively...")
+                     #pass same old startingvals list, since the deadEndCount is the index to tell it which combo of numbers to try from the list
+                     allOrders = sudokuSolveBox(board, bigBoxIndex, startingVals, deadEndCount, possibleBoxOrder, pBoxOrderCount, skippedVals )
+
+                     print("\n After saving possible Box order",pBoxOrderCount,", we have checked the rest of the startingvals and finished with", len(allOrders), "possible orders...")
+
+                     return allOrders #need to return the list of possible Boxes after 
+
+                  elif (pBoxOrderCount > 1): #if we have now saved 2 unique solutions AND DEADEND NOT HIT YET, we want to skip early to avoid doing 720 permutations
+
+                     print(f"\n So this box now has more than 1 unique possible solution curently saved...\n Skip this Box (box {bigBoxIndex}) and move on...")
+                     print(f"\n pBoxOrderCount: {pBoxOrderCount}, PossibleBoxOrder: {possibleBoxOrder}")
+
+                     skippedVals[2].append(bigBoxIndex) #add this Box to list of Boxes for easiestStart func to skip when choosing starting position
+
+                     temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+                     board = copy.deepcopy(board_backup)
+
+                     findEasiestStart.findEasiestStart(board, skippedVals )
 
                elif (deadEndCount == len(startingVals) ):
 
@@ -755,7 +807,7 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
 
                      skippedVals[2].append(bigBoxIndex) #add this Box to list of Boxes for easiestStart func to skip when choosing starting position
 
-                     temp_row_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
+                     temp_box_board = copy.deepcopy(board_backup) #re write temp and regular board back to starting point to try different order of numbers again
                      board = copy.deepcopy(board_backup)
 
                      findEasiestStart.findEasiestStart(board, skippedVals )
@@ -853,8 +905,8 @@ def sudokuSolveBox(board: list[list[str]], bigBoxIndex, startingVals, deadEndCou
                   #if Box only has one valid solution by the end of checking all permutations, then save the solution to the board and send it to find next starting point
                   #re save only solution to board before sending the board with the completed box to next start
 
-                  rowIndexStart = bigBoxIndex #=======================================================================================================================================
-                  #rowIndexEnd 
+                  rowIndexStart = bigBoxIndex-1 #need to force rowIndex to start with 0, 3 or 6
+                  rowIndexEnd = rowIndexStart+3 #need rowIndex to end at either 2, 5 or 8
                      
                   counterI = 2 #set up seperate variable from e to access all 9 vals in possibleOrder while using e to index the overall board properly 
                   #cI =2 results in possibleOrder[0][6- (6)] = [0][0], then [0][7 - (6)]= [0][1], then [0][2], then cI is 1 results in [0][6- (3)] = [0][3], [0][4], [0][5]
