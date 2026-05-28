@@ -103,7 +103,7 @@ def calcSteps(top: int) -> int:
 
 
 def calcSteps(top: int) -> int:
-   allStepPermutations = [] #empty list that will contain each list of possible combos of 1 and 2 steps to equal n
+   allStep1Permutations = [] #empty list that will contain each list of possible combos of 1 and 2 steps to equal n
 
    if (top >  0):
       #======================================================================================================================================== OneStep 
@@ -118,32 +118,38 @@ def calcSteps(top: int) -> int:
       print(f"\n total = {total}, and oneStepEach = \n")
       pprint.pprint(oneStepEach)
 
-      print("\n Adding oneStepEach to allStepPermutations...\n allStepPermutations = \n")
-      allStepPermutations.append(oneStepEach)
-      pprint.pprint(allStepPermutations)
+      print("\n Adding oneStepEach to allStep1Permutations...\n allStep1Permutations = \n")
+      allStep1Permutations.append(oneStepEach)
+      pprint.pprint(allStep1Permutations)
 
       #======================================================================================================================================== Check OneStep
+      """
       # check if the length of OneStepEach is even or odd, if odd, we know we can't use only two steps to get there, we will need to replace some ones with twos to get rest of combos
       doubleStepCheck = len(oneStepEach) % 2 
       print("\n Checking length of oneStepEach %2...")
 
-      
-
       #this means n has 1 left over after being divided by 2    =============================================== CANNOT USE 2 STEPS ALL THE WAY
-      print(f"\n INVALID!\n doubleStepCheck = {doubleStepCheck}, top / 2 = {top/2},\n total still equals: {total} ")
+      #print(f"\n INVALID!\n doubleStepCheck = {doubleStepCheck}, top / 2 = {top/2},\n total still equals: {total} ")
+      """
 
       #now we need to tweak top to figure out new combination using a mix of both steps
-      print("\n Checking top-1...")
+      print("\n Figuring out how many 2s can be used to replace pairs of 1 and still reach n...")
 
-      j = int( (top-1) /2)
+      j = int( top /2) #int gets rids of float value of decimial and rounds down if n is an uneven number
 
-      print(f"\n (top-1) /2 = {j}")
+      print(f"\n int(top / 2) = j = {j}")
 
       tempLastSteps = copy.deepcopy(oneStepEach) #define lastSteps list as oneStepEach first, then this will change on every iteration of loop in order to replace all 1s with 2s that are possible
       print(f"\n tempLastSteps = \n")
       pprint.pprint(tempLastSteps)
 
       for x in range(0, j): # need a new list for every 2 steps that can fit into n
+
+         #debug what order was used on each loop
+         """
+         print(f"\n tempLastSteps = \n")
+         pprint.pprint(tempLastSteps)
+         """
 
          mixSteps = [] # create and fill list to show order of steps to reach n using both kinds of steps at a time, RESETS EACH MAIN LOOP
 
@@ -157,31 +163,204 @@ def calcSteps(top: int) -> int:
          """
 
          newLength = len(tempLastSteps)-2 #need to put entire last list into this new list. except replace two 1s with a 2 upon each iteration, so this needs to be 2 less than last list each time
-         #NOT 1 LESS BECAUSE we add the 2 first and then need to run through the last list's remaining 1s, which the 2 replaces 2 1s in the list, 
+         #NOT 1 LESS BECAUSE we add the 2 above first, and then need to run through the last list's remaining 1s, which the 2 replaces 2 1s in the list, 
 
-         for y in range(0, newLength): # run through as much items as the last list had minus one item
+         if (newLength > 1): #if there is at least 2 more items in the last list, we want to add them to this new list (DONT ADD ANY IF ONLY ONE 1 REMAINS, WILL BREAK MATH TO REACH N)
+            print(f"\n newLength = {newLength}, adding rest of 1s to new list")
+            for y in range(0, newLength): # run through as much items as the last list had minus one item
 
-            #if (tempLastSteps[y] == 1): #if beginning of x loop, the first index should be a 1, 
-            mixSteps.append(1) #add the rest of the ones from the last list
+               #if (tempLastSteps[y] == 1): #if beginning of x loop, the first index should be a 1, 
+               mixSteps.append(1) #add the rest of the ones from the last list
 
-         print(f"\n mixSteps: \n")
+         mixStepsTotal = sum(mixSteps)
+
+         print(f"\n mixStepsTotal before check: {mixStepsTotal}, and mixSteps before check: \n")
          pprint.pprint(mixSteps)
 
-         print("\n Adding mixSteps to allStepPermutations...\n allStepPermutations = \n")
-         allStepPermutations.append(mixSteps)
-         pprint.pprint(allStepPermutations)
 
-         tempLastSteps = copy.deepcopy(mixSteps) #change last steps list to now be the list with the new 2 in it, so next loop doesn't add extra 1 each time
+         if (mixStepsTotal == top):
 
-               
+            print("\n MixSteps adds up to n correctly!")
+            proofString = "+".join(str(items) for items in mixSteps)
+            print(f"\n n = {top}, and {top} = {proofString}")
+
+            print("\n Finding other permutations of current MixSteps...")
+            mixStepsPermutations = set(itertools.permutations(mixSteps)) # SET of possible combos in order to get rid of repeating combos
+
+            print("\n mixStepsPermutations = \n")
+            pprint.pprint(mixStepsPermutations)
+
+            if (len(mixStepsPermutations) > 1): #if there are other possible orders of mixSteps, save each list into main list
+
+               print("\n MORE THAN 1 POSSIBLE ORDER!")
+               #pprint.pprint(mixStepsPermutations)
+
+               print("\n Adding all of mixStepsPermutations to allStep1Permutations...\n allStep1Permutations = \n")
+
+               for order in mixStepsPermutations:
+
+                  allStep1Permutations.append(order)
+
+               pprint.pprint(allStep1Permutations)
+
+            elif (len(mixStepsPermutations) == 1): #if there are no other possible orders of mixSteps, just save the one version to the big list
+
+               print("\n ONLY 1 POSSIBLE ORDER!")
+               #pprint.pprint(mixStepsPermutations)
+
+               print("\n Adding mixStepsPermutations to allStep1Permutations...\n allStep1Permutations = \n")
+               allStep1Permutations.append(mixStepsPermutations)
+               pprint.pprint(allStep1Permutations)
+
+            tempLastSteps = copy.deepcopy(mixSteps) #change last steps list to now be the list with the new 2 in it, so next loop doesn't add extra 1 each time
+
+         elif (mixStepsTotal < top):
+
+            print("\n MixSteps is LESS THAN N!\n Not adding mixSteps to allStepPermutations...")
+
+            print(f"\n Adding last of 1s to new list...")
+           
+            mixSteps.append(1) #add the rest of the ones from the last list
+
+            mixStepsTotal2 = sum(mixSteps)
+
+            print(f"\n mixStepsTotal2 before 2nd check: {mixStepsTotal2}, and mixSteps before 2nd check: \n")
+            pprint.pprint(mixSteps)
+
+            if (mixStepsTotal2 == top):
+
+               print("\n MixSteps adds up to n correctly!")
+               proofString2 = "+".join(str(values) for values in mixSteps)
+               print(f"\n n = {top}, and {top} = {proofString2}")
+
+               print("\n Finding other permutations of current MixSteps...")
+               mixStepsPermutations2 = set(itertools.permutations(mixSteps)) # SET of possible combos in order to get rid of repeating combos
+
+               print("\n mixStepsPermutations2 = \n")
+               pprint.pprint(mixStepsPermutations2)
+
+               if (len(mixStepsPermutations2) > 1): #if there are other possible orders of mixSteps, save each list into main list
+
+                  print("\n MORE THAN 1 POSSIBLE ORDER!")
+                  #pprint.pprint(mixStepsPermutations2)
+
+                  print("\n Adding all of mixStepsPermutations2 to allStep1Permutations...\n allStep1Permutations = \n")
+
+                  for orders in mixStepsPermutations2:
+
+                     allStep1Permutations.append(orders)
+
+                  pprint.pprint(allStep1Permutations)
+
+               elif (len(mixStepsPermutations2) == 1): #if there are no other possible orders of mixSteps, just save the one version to the big list
+
+                  print("\n ONLY 1 POSSIBLE ORDER!")
+                  #pprint.pprint(mixStepsPermutations2)
+
+                  print("\n Adding mixStepsPermutations2 to allStep1Permutations...\n allStep1Permutations = \n")
+                  allStep1Permutations.append(mixStepsPermutations2)
+                  pprint.pprint(allStep1Permutations)
+
+               tempLastSteps = copy.deepcopy(mixSteps) #change last steps list to now be the list with the new 2 in it, so next loop doesn't add extra 1 each time
+
+         elif (mixStepsTotal > top):
+
+            print("\n MixSteps is MORE THAN N!\n Not adding mixSteps to allStepPermutations...")
+
+            print(f"\n Subtracting last item from new list (should be a 1)...")
+           
+            del mixSteps[-1] #delete the last of the ones from the last list
+
+            mixStepsTotal2 = sum(mixSteps)
+
+            print(f"\n mixStepsTotal2 before 2nd check: {mixStepsTotal2}, and mixSteps before 2nd check: \n")
+            pprint.pprint(mixSteps)
+
+            if (mixStepsTotal2 == top):
+
+               print("\n MixSteps adds up to n correctly!")
+               proofString2 = "+".join(str(values) for values in mixSteps)
+               print(f"\n n = {top}, and {top} = {proofString2}")
+
+               print("\n Finding other permutations of current MixSteps...")
+               mixStepsPermutations2 = set(itertools.permutations(mixSteps)) # SET of possible combos in order to get rid of repeating combos
+
+               print("\n mixStepsPermutations2 = \n")
+               pprint.pprint(mixStepsPermutations2)
+
+               if (len(mixStepsPermutations2) > 1): #if there are other possible orders of mixSteps, save each list into main list
+
+                  print("\n MORE THAN 1 POSSIBLE ORDER!")
+                  #pprint.pprint(mixStepsPermutations2)
+
+                  print("\n Adding all of mixStepsPermutations2 to allStep1Permutations...\n allStep1Permutations = \n")
+
+                  for orders in mixStepsPermutations2:
+
+                     allStep1Permutations.append(orders)
+
+                  pprint.pprint(allStep1Permutations)
+
+               elif (len(mixStepsPermutations2) == 1): #if there are no other possible orders of mixSteps, just save the one version to the big list
+
+                  print("\n ONLY 1 POSSIBLE ORDER!")
+                  #pprint.pprint(mixStepsPermutations2)
+
+                  print("\n Adding mixStepsPermutations2 to allStep1Permutations...\n allStep1Permutations = \n")
+                  allStep1Permutations.append(mixStepsPermutations2)
+                  pprint.pprint(allStep1Permutations)
+
+               tempLastSteps = copy.deepcopy(mixSteps) #change last steps list to now be the list with the new 2 in it, so next loop doesn't add extra 1 each time
 
 
 
 
+      #============================================ END OF X FOR LOOP (should have all step 1 permutations ready) ======================================================
+
+      #now we have the list of 1 steps only, the list with 2 steps only if applicable, and each possible version of a list containing a combo of 2 and 1s to reach n,
+
+      #NEED TO FIND HOW MANY ITEMS IN BIG LIST AND RETURN IT
+      return len(allStep1Permutations)
       
    else:
 
       print("\n ERROR: Input received is INVALID (an INT that IS Negative or equal to 0)...please try new input...closing...")
+
+
+"""
+def calcSteps2(top: int) -> int:
+
+   fullStepsList = [] #empty list to store all possible permutations of steps to reach n
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def main():
@@ -190,7 +369,7 @@ def main():
    print("=" * 50)
 
    #=========================================================== N = 2 ======================================== DEFAULT EXAMPLE 1
-   target1 = 3
+   target1 = 2
 
    print(f"\n Input 1: n = {target1}") #print first n to console
    print("-" * 50)
@@ -212,8 +391,6 @@ def main():
    print(f"\n Final Result: {calcSteps(target2)} ") 
    print("=" * 50)
 
-   """
-   """
    #=========================================================== N = 0 ======================================== CUSTOM EXAMPLE 1
    target3 = 0
 
@@ -248,8 +425,21 @@ def main():
    print("-" * 50)
    print(f"\n Final Result: {calcSteps(target5)} ") 
    print("=" * 50)
-   """
    
+   """
+   """
+   #=========================================================== N = 10 ======================================== CUSTOM EXAMPLE 4
+   target6 = 10
+
+   print(f"\n Input 6: n = {target6}") #print n to console
+   print("-" * 50)
+
+   print("\n Output 6:") 
+   print("-" * 50)
+   print(f"\n Final Result: {calcSteps(target6)} ") 
+   print("=" * 50)
+   """
+
    """
    #======================================================== FINAL REMARKS ======================================
    print("\n Final Remarks:") 
