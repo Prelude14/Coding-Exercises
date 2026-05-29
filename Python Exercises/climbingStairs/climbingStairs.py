@@ -30,7 +30,7 @@ import itertools #need .permutations() in order to get each solver function to t
 import copy #need a way to create an entirely new copy of a list, this is probably overkill for just a regular list of ints, but I like how this tool works
 
 """
-def calcSteps(top: int) -> int:
+def calcSteps1(top: int) -> int:
    allStepPermutations = [] #empty list that will contain each list of possible combos of 1 and 2 steps to equal n
 
    if (top >  0):
@@ -100,9 +100,10 @@ def calcSteps(top: int) -> int:
 
       print("\n ERROR: Input received is INVALID (an INT that IS Negative or equal to 0)...please try new input...closing...")
 """
+#=================================== END calcSteps1 ====================================================================================================================
 
-
-def calcSteps(top: int) -> int:
+"""
+def calcSteps2(top: int) -> int:
    allStep1Permutations = [] #empty list that will contain each list of possible combos of 1 and 2 steps to equal n
 
    if (top >  0):
@@ -123,14 +124,15 @@ def calcSteps(top: int) -> int:
       pprint.pprint(allStep1Permutations)
 
       #======================================================================================================================================== Check OneStep
-      """
+      
+      
       # check if the length of OneStepEach is even or odd, if odd, we know we can't use only two steps to get there, we will need to replace some ones with twos to get rest of combos
-      doubleStepCheck = len(oneStepEach) % 2 
-      print("\n Checking length of oneStepEach %2...")
+      #doubleStepCheck = len(oneStepEach) % 2 
+      #print("\n Checking length of oneStepEach %2...")
 
       #this means n has 1 left over after being divided by 2    =============================================== CANNOT USE 2 STEPS ALL THE WAY
       #print(f"\n INVALID!\n doubleStepCheck = {doubleStepCheck}, top / 2 = {top/2},\n total still equals: {total} ")
-      """
+
 
       #now we need to tweak top to figure out new combination using a mix of both steps
       print("\n Figuring out how many 2s can be used to replace pairs of 1 and still reach n...")
@@ -146,21 +148,19 @@ def calcSteps(top: int) -> int:
       for x in range(0, j): # need a new list for every 2 steps that can fit into n
 
          #debug what order was used on each loop
-         """
-         print(f"\n tempLastSteps = \n")
-         pprint.pprint(tempLastSteps)
-         """
+         #print(f"\n tempLastSteps = \n")
+         #pprint.pprint(tempLastSteps)
+
 
          mixSteps = [] # create and fill list to show order of steps to reach n using both kinds of steps at a time, RESETS EACH MAIN LOOP
 
          for m in range(0,x+1): 
             mixSteps.append(2) #fill beginning of list with as many 2s as the x that the loop is currently on
 
-         """
          #read oneStepEach list starting at x * 2 as the index to find what pair of 1s to replace with a 2
-         tempStepIndex = x*2
-         print(f"\n tempStepIndex = {tempStepIndex}")
-         """
+         #tempStepIndex = x*2
+         #print(f"\n tempStepIndex = {tempStepIndex}")
+
 
          newLength = len(tempLastSteps)-2 #need to put entire last list into this new list. except replace two 1s with a 2 upon each iteration, so this needs to be 2 less than last list each time
          #NOT 1 LESS BECAUSE we add the 2 above first, and then need to run through the last list's remaining 1s, which the 2 replaces 2 1s in the list, 
@@ -325,43 +325,273 @@ def calcSteps(top: int) -> int:
    else:
 
       print("\n ERROR: Input received is INVALID (an INT that IS Negative or equal to 0)...please try new input...closing...")
+""" #=================================== END calcSteps2 ====================================================================================================================
 
 
-"""
-def calcSteps2(top: int) -> int:
+def calcSteps(top: int) -> int:
 
    fullStepsList = [] #empty list to store all possible permutations of steps to reach n
-"""
+
+   oneSteps = []
+
+   if (top > 0): #CHECK THAT N IS VALID POSTIVE NUMBER ABOVE 0 ====================================
+
+      for i in range(0, top):
+
+         oneSteps.append(1)
+
+      print(f" Top = {top}, OneSteps = \n")
+      pprint.pprint(oneSteps)
+
+      print("\n Adding oneSteps to fullStepsList...\n fullStepsList = \n")
+      fullStepsList.append(oneSteps)
+      pprint.pprint(fullStepsList)
+
+      #now we need to figure out new combinations using a mix of both steps
+      #NEED to now begin replacing pairs of 1s with a single 2 using the original list of 1s, until there is no more pairs left to replace and need to ensure the total of each list remains equal to n
+      print("\n Figuring out how many 2s can be used to replace pairs of 1 and still reach n...")
+      #print("\n If n%2 == 0, the final possible list's length will be equal to n/2, and will be all 2s...")
+      #print("\n If n%2 != 0, the final possible list's length will be equal to (n/2)+1, and will be ONE 1 and REST 2s...")
+
+      tempLastSteps = copy.deepcopy(oneSteps) #define lastSteps list as oneSteps first, then this will change on every iteration of loop in order to replace all 1s with 2s that are possible
+      print(f"\n tempLastSteps = \n")
+      pprint.pprint(tempLastSteps)
+
+      #check if n is even or odd using %2, using the oneSteps list
+      nEvenOrOdd = len(oneSteps) % 2 
+      print(f"\n Checking length of oneSteps %2... It equals: {nEvenOrOdd}, top/2 = {(top/2)}")
+
+      if (nEvenOrOdd == 0):   #==================================================================================================================== EVEN N 
+
+         print(f"\n Length is EVEN, so n is also even, this means the last combination of steps will be all 2s...")
+
+         howMany2sEVEN = int(top / 2)
+
+         for x in range(0, howMany2sEVEN): # need a new list for every 2 steps that can replace a pair of 1s and still add up to n
+
+            #debug what order was used on each loop
+            """
+            print(f"\n tempLastSteps = \n")
+            pprint.pprint(tempLastSteps)
+            """
+            #check that there is at least 1 pair of 1s left in the current list
+            count1s = 0
+            index1st1 = 0
+            for index, steps in enumerate(tempLastSteps):
+
+               if (steps == 1 and count1s == 0): #if FIRST 1, get index of that item
+
+                  index1st1 = index
+                  count1s += 1
+                  print(f"\n First 1 found at index: {index1st1}, count1s now: {count1s}")
+
+               elif (steps == 1 and count1s == 1): #if SECOND 1, confirm there is at least 2 1s left and break loop
+
+                  count1s += 1
+                  print(f"\n Second 1 found at index: {index}, count1s now: {count1s}, breaking from pair checking Loop...")
+                  break
+
+               #elif (steps == 2 and count1s == 0 and index == len(tempLastSteps)): #this means there are no more 1s left in the list to replace, shouldn't happen***********
+
+            #change last steps list to now be the list with the new 2 in it, so next loop doesn't add extra 1 each time
+            tempLastSteps = copy.deepcopy(put2InList(tempLastSteps, index1st1))
+
+            print(f"\n tempLastSteps after being sent to put2InList = ")
+            pprint.pprint(tempLastSteps)
+
+            print("\n Checking if new list is still equal to original n...\n Sending List to validateSumAndFindPermutations...")
+            mixStepsPermutations = copy.deepcopy(validateSumAndFindPermutations(tempLastSteps, top))
+
+            print("\n Received mixStepPermutations from validateSumAndFindPermutations...\n Sending to savePermutations to be saved...")
+            fullStepsList = copy.deepcopy(savePermutations(mixStepsPermutations, fullStepsList))
+
+            print("\n Received fullStepsList from savePermutations...\n fullStepsList = \n")
+            pprint.pprint(fullStepsList)
+
+
+      elif (nEvenOrOdd != 0):   #==================================================================================================================== ODD N  
+
+         print(f"\n Length is ODD, so n is also odd, this means the last combination of steps will end in a 1 and the rest are 2s...")
+
+         howMany2sODD = int( (top-1) / 2)
+
+         for y in range(0, howMany2sODD): # need a new list for every 2 steps that can replace a pair of 1s and still add up to n
+
+            #debug what order was used on each loop
+            """
+            print(f"\n tempLastSteps = \n")
+            pprint.pprint(tempLastSteps)
+            """
+            #check that there is at least 1 pair of 1s left in the current list
+            count1sODD = 0
+            index1st1ODD = 0
+            for indexODD, stepsODD in enumerate(tempLastSteps):
+
+               if (stepsODD == 1 and count1sODD == 0): #if FIRST 1, get index of that item
+
+                  index1st1ODD = indexODD
+                  count1sODD += 1
+                  print(f"\n First 1 found at index: {index1st1ODD}, count1s now: {count1sODD}")
+
+               elif (stepsODD == 1 and count1sODD == 1): #if SECOND 1, confirm there is at least 2 1s left and break loop
+
+                  count1sODD += 1
+                  print(f"\n Second 1 found at index: {indexODD}, count1s now: {count1sODD}, breaking from pair checking Loop...")
+                  break
+
+               #elif (steps == 2 and count1s == 0 and index == len(tempLastSteps)): #this means there are no more 1s left in the list to replace, shouldn't happen***********
+
+            #change last steps list to now be the list with the new 2 in it, so next loop doesn't add extra 1 each time
+            tempLastSteps = copy.deepcopy(put2InList(tempLastSteps, index1st1ODD))
+
+            print(f"\n tempLastSteps after being sent to put2InList = ")
+            pprint.pprint(tempLastSteps)
+
+            print("\n Checking if new list is still equal to original n...\n Sending List to validateSumAndFindPermutations...")
+            mixStepsPermutations = copy.deepcopy(validateSumAndFindPermutations(tempLastSteps, top))
+
+            print("\n Received mixStepPermutations from validateSumAndFindPermutations...\n Sending to savePermutations to be saved...")
+            fullStepsList = copy.deepcopy(savePermutations(mixStepsPermutations, fullStepsList))
+
+            print("\n Received fullStepsList from savePermutations...\n fullStepsList = \n")
+            pprint.pprint(fullStepsList)
+
+
+         #===================== END Y FOR =====================
+
+      #NEED TO FIND HOW MANY ITEMS IN BIG LIST AFTER ALL LOOPS ARE DONE AND RETURN IT
+      return len(fullStepsList)
+
+   else: #IF N IS LESS THAN OR EQUAL TO 0, its INVALID
+
+      print("\n ERROR: Input received is INVALID (an INT that IS Negative or equal to 0)...please try new input...closing...")
 
 
 
 
 
+#function to make new version of tempList that replaces the first 1 with a 2 and deletes the 2nd 1 in the list,
+def put2InList(tempList: list[int], index1st1: int) -> list[int]:
+
+   newList = []
+
+   for index, steps in enumerate(tempList):
+
+         if (steps == 2):
+            #print(f"\n put2InList found 2s in list, putting them in new list...")
+            newList.append(2)
+
+         elif (steps == 1 and index == index1st1):
+
+            #print(f"\n put2InList found the FIRST 1 in the list, replacing it with a 2...")
+            newList.append(2) #still add a 2, but this time its in place of the first 1 in the original list
+
+         elif (steps == 1 and index == (index1st1+1) ):
+
+            print(f"\n put2InList found the second 1 in the list, and it is skipping it...")
+
+         elif (steps == 1 and index > (index1st1+1) ):
+
+            #print(f"\n put2InList found the rest of the 1s in the rest of the list, putting them in new list...")
+            newList.append(1)
+
+   print(f"\n put2InList created a new list by replacing one pair of 1s with a 2...\n newList =")
+   pprint.pprint(newList)
+
+   return newList
 
 
+#function that checks if a list adds up to n and then finds all permutations if it does
+def validateSumAndFindPermutations(tempList: list[int], top: int) -> list[int]:
+
+   tempSum = sum(tempList)
+
+   if (tempSum == top):
+
+      print("\n tempList adds up to n correctly!")
+      proofString = "+".join(str(values) for values in tempList)
+      print(f" n = {top}, and {top} = {proofString}")
+
+      if (len(tempList) > 1): #if received a list with more than 1 item, than there should be permutations to find
+
+         print("\n Finding other permutations of current tempList...")
+         mixStepsPermutations = set(itertools.permutations(tempList)) # SET of possible combos in order to get rid of repeating combos
+
+         print(" mixStepsPermutations = \n")
+         pprint.pprint(mixStepsPermutations)
+
+         print("\n Sending all permutations back to to calcSteps...")
+         return list(mixStepsPermutations) #always send list version of set
+
+      elif (len(tempList) == 1): #if received a list with only 1 item, there is no ther possible order, so no point in finding permutations, just send back same list
+
+         print("\n tempList contains ONLY 1 item, no other possible permutations...")
+         print("\n Sending original order back to to calcSteps...")
+         return tempList 
+
+      else:
+         print("\n Error, len(tempList) < 1, must be an error with a list somewhere...")
 
 
+   elif (tempSum == (top-1)): #if sent list of ODD LENGTH it will be missing the last 1 it needs to equal n
 
+      print("\n tempList is 1 LESS THAN n! Adding last 1 to list...")
+      tempList.append(1)
 
+      tempSum2 = sum(tempList) #check sum again
 
+      if (tempSum2 == top):
 
+         print("\n tempList now adds up to n correctly!")
+         proofStringODD = "+".join(str(valuesODD) for valuesODD in tempList)
+         print(f" n = {top}, and {top} = {proofStringODD}")
 
+         print("\n Finding other permutations of current tempList...")
+         mixStepsPermutations = set(itertools.permutations(tempList)) # SET of possible combos in order to get rid of repeating combos
 
+         print(" mixStepsPermutations = \n")
+         pprint.pprint(mixStepsPermutations)
 
+         return list(mixStepsPermutations) #always send list version of set
 
+      elif (tempSum2 != top):
+         print("\n Error, tempSum2 != top even after adding a 1 to tempList, must be an error with a list somewhere...")
 
+   else:
+      print("\nError, tempSum != top AND tempSum != (top-1), must be an error with a list somewhere...")
 
+#function to save all the permutations of a list to the big main list,
+def savePermutations(mixStepsPermutationsList: list[int], tempFullStepsList: list[int]) -> list[int]:
 
+   if (len(mixStepsPermutationsList) > 1): #if there are other possible orders of mixSteps, save each list into main list
 
+      print("\n MORE THAN 1 POSSIBLE ORDER!")
+      #pprint.pprint(mixStepsPermutationsList)
 
+      print("\n Adding all of mixStepsPermutationsList to tempFullStepsList...")
+      #print("\n Adding all of mixStepsPermutationsList to tempFullStepsList...\n tempFullStepsList = \n")
 
+      for order in mixStepsPermutationsList:
 
+         tempFullStepsList.append(order)
 
+      #pprint.pprint(tempFullStepsList)
 
+   elif (len(mixStepsPermutationsList) == 1): #if there are no other possible orders of mixSteps, just save the one version to the big list
 
+      print("\n ONLY 1 POSSIBLE ORDER!")
+      #pprint.pprint(mixStepsPermutationsList)
 
+      print("\n Adding all of mixStepsPermutationsList to tempFullStepsList...")
+      #print("\n Adding all of mixStepsPermutationsList to tempFullStepsList...\n tempFullStepsList = \n")
+      tempFullStepsList.append(mixStepsPermutationsList)
+      #pprint.pprint(tempFullStepsList)
 
+   elif (len(mixStepsPermutationsList) < 1):
 
+      print("\n Error! len(mixStepsPermutations) < 1, must be an error with a list somewhere...")
+
+   return tempFullStepsList
 
 def main():
    print("=" * 50)
@@ -379,7 +609,7 @@ def main():
    print(f"\n Final Result: {calcSteps(target1)} ") 
    print("=" * 50)
 
-   """
+   
    #=========================================================== N = 3 ======================================== DEFAULT EXAMPLE 2
    target2 = 3
 
@@ -413,7 +643,7 @@ def main():
    print(f"\n Final Result: {calcSteps(target4)} ") 
    print("=" * 50)
 
-   """
+   
    """
    #=========================================================== N = "string" ======================================== CUSTOM EXAMPLE 3
    target5 = "string"
@@ -427,9 +657,9 @@ def main():
    print("=" * 50)
    
    """
-   """
-   #=========================================================== N = 10 ======================================== CUSTOM EXAMPLE 4
-   target6 = 10
+   
+   #=========================================================== N = 12 ======================================== CUSTOM EXAMPLE 4
+   target6 = 12
 
    print(f"\n Input 6: n = {target6}") #print n to console
    print("-" * 50)
@@ -438,52 +668,53 @@ def main():
    print("-" * 50)
    print(f"\n Final Result: {calcSteps(target6)} ") 
    print("=" * 50)
-   """
+   
 
-   """
+   
    #======================================================== FINAL REMARKS ======================================
    print("\n Final Remarks:") 
    print("-" * 50)
-   print("\n So I ended up doing a Binary search over the first value in each row of the matrix to find which row could contain")
-   print("\n the target value, and then I did a 2nd Binary search over the values in said row, to find if the target value exists")
-   print("\n within it or not...\n\n\n The first Binary search's complexity takes O(log m) time, where m is the number of rows in the matrix.")
-   print("\n So its logarithmic.\n\n\n The second Binary search's complexity takes O(log n) time, where n is the number of columns in the target array.")
-   print("\n So its also logarithmic.\n\n\n Therefore since both binary searches are logarithmic algorithms, and I did not nest the 2nd inside the first, ")
-   print("\n the overall time complexity is:\n\n\n O(log m + log n), which is equal to the required complexity of O(log(m*n))...")
-   print("\n\n See LOG PRODUCT RULE: 'the sum of logarithms is the logarithm of the product -> log m + log n = log(m * n)' \n")
+   print("\n So I ended up writing 3 different versions of this. \n The first ('calcSteps1') was never finished, but helped me wrap my head around how I was going to calculate all of ")
+   print(" the possible combinations of 1 and 2 steps to reach n. It created a list of length n containing only 1s, then ")
+   print(" checked if the n was even to see if it would be possible to replace every 1 in the list with a 2 without leftovers.")
+   print(" Once I started trying to figure out the mix of 1 and 2, as well as trying n=3, I decided I was going to have to change")
+   print(" how it worked. ")
    print("-" * 50)
-   print(" Explanation of Examples:")
+   print("\n 'calcSteps2' was different, I managed to get it to output the correct number from the examples, but when increasing n, ")
+   print(" I realized the logic was not working correctly. I believe this is due to how I was adding 2s and deleting 1s from")
+   print(" the lists, as well as how it handled an n that was an odd number that needed a single 1 to be kept in the list. ")
+   print(" I was in a rush when I wrote it, and besides not working right, it was in need of a pretty good clean up too, so...")
    print("-" * 50)
-   print("\n\n I ran the 2 examples from the example itself first, then altered matrix 2 to contain 13 & 21 inside of its 2nd array")
-   print("\n in order to check if the function could find the target 13 properly if the target wasn't an array's first value, and ")
-   print("\n if the arrays were different lengths, and it does!")
-   print("\n\n Then in matrix 4, I used matrix 2 and a target of 23 to test if the first while loop would find the target after")
-   print("\n checking the nextFirstVal while checking the array [10,11,16,20]. It checks 10, sees that it's smaller than 23,")
-   print("\n then it checks the next array and finds 23, returning true immediately like intended.")
-   print("\n\n Then in matrix 5, I used matrix 2 and a target of 100 to test if the function properly checks for a target that")
-   print("\n is bigger than any value in the matrix. Previously, it was creating an indexing issue when the nextFirstVal is")
-   print("\n calculated when the last searchable array is currently being checked, since nextFirstVal = matrix[middleIndex + 1],")
-   print("\n and if its the last searchable index, middleIndex + 1 doesn't exist. Now it correctly deduces that if the current")
-   print("\n middleIndex is the last searchable array inside matrix and the firstVal of that array is smaller than the target,")
-   print("\n than the only possible place for the target to exist is the current array, and sends this targetArray to the next")
-   print("\n while loop to be searched there...")
-   print("\n\n Then in matrix 6, I used matrix 2 and a target of 0 to test if the function properly checks for a target that")
-   print("\n is smaller than any value in the matrix. Previously, it was creating an indexing issue when the last searchable")
-   print("\n array is currently being checked and the firstVal is bigger than the target, since the first while loop just sets")
-   print("\n the end index to be a negative index after this happens, and then exits its loop. Then when the 2nd while loop goes")
-   print("\n to run, it can't use targetArray as an index for the matrix, since the first while loop never set it properly.")
-   print("\n So now if the first loop finds the firstVal of the last searchable array in the matrix to be bigger than the target,")
-   print("\n it immediately returns false (since this means the target cannot exist inside the matrix), and prevents the 2nd while")
-   print("\n loop from running and reaching the indexing issue with targetArray. Also, it now prevents setting the end index to a")
-   print("\n negative int, since the end index is only reduced if there are still searchable arrays remaing in the matrix.\n")
+   print("\n I re-worked into 'calcSteps', and split it into 3 additional functions: \n 'put2InList', 'validateSumAndFindPermutations' and 'savePermutations'")
+   print("\n CalcSteps is solid mix of the first 2 versions, but it actually works as expected with an n up to 11, or 14 if")
+   print(" you don't mind waiting about 6 mins for it to calculate all 610 possible permutations. And 13 only took")
+   print(" about 1 minute to find 377 possible orders, so clearly increasing n expontentially increases the amount of distinct")
+   print(" and possible ways of 'climbing to the top of the stairs', and drastically increases the run time of the program.")
    print("-" * 50)
-   print(" Note:")
+   print("\n It works by creating a list of length n full of 1s, then checking if n is even or odd. If even, it then loops")
+   print(" through the list of 1s (n/2) times, each time replacing the first 2 1s in the list with a 2, until the list")
+   print(" IS ALL 2s! If it is odd, it does the same but ( (n-1) / 2)) times instead, since it can only replace a pair")
+   print(" of 1s with a 2 and needs to leave a single 1 alone. Each run of the loop sends the original list to 'put2InList',")
+   print(" and it gets sent back the new version of the list containg one 2 in the place of two 1s. \n")
+   print(" Then it sends that new list to 'validateSumAndFindPermutations', where the sum of the list is checked against n.")
+   print(" If it is equal to n, that means that the list is valid, if it is equal to (n-1), then we know that we need to")
+   print(" add a single 1 to the list to correct it (it must of been an odd n). It then checks how many items are in the list,")
+   print(" and if there is only one (in the case of n=2), then it just sends the list back to calcSteps right there since there")
+   print(" is no other possible permutations to calculate. If there is more than one item however, it then uses .permutations() ")
+   print(" and sets in order to calculate a list containting all the other possible orders of steps using that list, and ")
+   print(" then finally it sends that big list back to calcSteps.\n")
+   print(" Lastly, calcSteps then sends its version of fullStepsList and the permutations list that it received to ")
+   print(" 'savePermutations'. Here the length of the list of permutations is checked to see if there is more than one, or")
+   print(" only 1, and then it sends the permutations of that current loop to the main calcSteps fullStepsList, so that by the")
+   print(" time all the permutations are found, calcSteps can just return the amount of permutations in the fullStepsList.")
    print("-" * 50)
-   print("\n Because of how the example is presented, I never created any test cases to check if the function works with a")
-   print("\n matrix that is unsorted, sorted diffently than lowest to highest int, or contains anything other than ints etc.,")
-   print("\n and the same applies to a target value that isn't an int etc...")
-   """
-
+   print(" I also have checks for an n that is equal to or less than 0, and I did have a test for a string, but its commented")
+   print(" out because it fully stops the program from running at all. ")
+   print("-" * 50)
+   print(" Overall I'm pretty happy with it in its current state and think I accomplished what the exercise was going for,")
+   print(" and while it seemed like it was going to be quite simple at the start, I'm glad that it turned out to be a bit")
+   print(" more involved than anticipated. I'm also positive that there are other ways to do it, and I'm confident in my ")
+   print(" version, but I do think there might be more efficient ways to do it hypothetically.  ")
 
 if __name__ == "__main__":
    main()
